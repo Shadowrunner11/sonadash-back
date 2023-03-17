@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_PASSWORD}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_USER}
+    ports:
+      - 27017:27017
