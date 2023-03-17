@@ -5,7 +5,10 @@ services:
     image: mongo
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_PASSWORD}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_USER}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USER} 
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: sonar
     ports:
       - 27017:27017
+    volumes:
+      - ${HOME}/sonar/mongo:/data/db
