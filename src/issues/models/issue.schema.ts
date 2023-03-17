@@ -1,9 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import type { HydratedDocument } from 'mongoose';
 
-enum IssueObservations {
+export enum IssueObservations {
   Bug = 'BUG',
   CodeSmell = 'CODE_SMELL',
+  DuplicatedCode = 'CODIGO_DUPLICADO',
+  Cobertura = 'COBERTURA',
 }
 
 export enum Severity {
@@ -16,6 +18,9 @@ export enum Severity {
 @Schema()
 export class Issue {
   @Prop()
+  sonarKey: string;
+
+  @Prop()
   observation: IssueObservations;
 
   @Prop()
@@ -23,6 +28,21 @@ export class Issue {
 
   @Prop()
   language: string;
+
+  @Prop()
+  rule: string;
+
+  @Prop()
+  startLine: number;
+
+  @Prop()
+  developerEmail: string;
+
+  @Prop()
+  date: Date;
+
+  @Prop()
+  file: string;
 }
 
 export type IssueDocument = HydratedDocument<Issue>;
