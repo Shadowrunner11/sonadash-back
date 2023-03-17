@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CatsModule } from './cats/cats.module';
+import { IssuesModule } from './issues/issues.module';
 
 enum envProps {
   MONGO_URI = 'MONGODB_URI',
@@ -19,6 +20,7 @@ enum envProps {
       }),
     }),
     CatsModule,
+    IssuesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
