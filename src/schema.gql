@@ -1,0 +1,29 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Project {
+  _id: ID!
+  name: String!
+}
+
+type Author {
+  _id: ID!
+  email: String!
+}
+
+type PaginationInfo {
+  page: Int!
+  total: Int!
+  hasNext: Boolean!
+}
+
+type AuthorPagination {
+  data: [Author!]!
+  pagination: PaginationInfo!
+}
+
+type Query {
+  project(_id: ID!): Project!
+  authors(page: Int!, limit: Float! = 10): AuthorPagination!
+}

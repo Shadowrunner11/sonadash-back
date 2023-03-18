@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import type { Model } from 'mongoose';
 import { SonarDataSourceService } from 'src/sonar-data-source/sonar-data-source.service';
 import { ProjectsDocument } from './models/projects.schema';
-import type { Model } from 'mongoose';
+import type { CreateProjectsDTO } from './types';
 
 @Injectable()
 export class ProjectsMigrationService {
@@ -15,6 +16,13 @@ export class ProjectsMigrationService {
   async migrateAllProjects() {
     const allProjects = await this.sonarDataSource.getAllProjects();
 
-    return this.projectModel.create(allProjects);
+    const parsedAllProjects: CreateProjectsDTO[] = allProjects.map(
+      ({ key, ...rest }) => ({
+        ...rest,
+        sonarKey: key,
+      }),
+    );
+
+    return this.projectModel.create(parsedAllProjects);
   }
 }

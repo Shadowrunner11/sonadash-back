@@ -3,10 +3,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CatsModule } from './cats/cats.module';
 import { IssuesModule } from './issues/issues.module';
 import { SonarDataSourceModule } from './sonar-data-source/sonar-data-source.module';
 import { ProjectsModule } from './projects/projects.module';
+import { QueueModule } from './queue/queue.module';
+import { AuthorModule } from './author/author.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
 
 enum envProps {
   MONGO_URI = 'MONGODB_URI',
@@ -23,12 +27,22 @@ enum envProps {
         uri: config.getOrThrow<string>(envProps.MONGO_URI),
       }),
     }),
-    CatsModule,
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+    }),
     IssuesModule,
     ProjectsModule,
     SonarDataSourceModule,
+    AuthorModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  static port: number;
+  constructor(private config: ConfigService) {
+    AppModule.port = config.get<number>('PORT', 3000);
+  }
+}

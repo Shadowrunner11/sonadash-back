@@ -1,4 +1,3 @@
-import { PROPERTY_DEPS_METADATA } from '@nestjs/common/constants';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import type { HydratedDocument } from 'mongoose';
 
@@ -12,7 +11,7 @@ export enum Visibility {
   visibility = 'PUBLIC',
 }
 
-@Schema()
+@Schema({ timestamps: true })
 export class Projects {
   @Prop()
   sonarKey: string;

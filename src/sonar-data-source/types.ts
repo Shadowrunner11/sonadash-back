@@ -1,3 +1,5 @@
+import { AxiosBasicCredentials } from 'axios';
+
 export interface ProjectsResponse {
   paging: Paging;
   components: Component[];
@@ -18,8 +20,12 @@ export enum Visibility {
   Public = 'public',
 }
 
+export enum FacetValues {
+  AUTHORS = 'authors',
+}
+
 export interface Facet {
-  property: string;
+  property: FacetValues;
   values: Value[];
 }
 
@@ -60,11 +66,6 @@ export enum Qualifier {
   Uts = 'UTS',
 }
 
-export interface Facet {
-  property: string;
-  values: Value[];
-}
-
 export interface Value {
   val: string;
   count: number;
@@ -86,18 +87,10 @@ export interface Issue {
   debt?: Debt;
   author: string;
   tags: Tag[];
-  creationDate: CreationDateEnum;
-  updateDate: CreationDateEnum;
+  creationDate: Date;
+  updateDate: Date;
   type: Type;
   scope: Scope;
-}
-
-export enum CreationDateEnum {
-  The20200722T1810160000 = '2020-07-22T18:10:16+0000',
-  The20200722T2048140000 = '2020-07-22T20:48:14+0000',
-  The20200722T2127440000 = '2020-07-22T21:27:44+0000',
-  The20200722T2238320000 = '2020-07-22T22:38:32+0000',
-  The20210630T2154260000 = '2021-06-30T21:54:26+0000',
 }
 
 export enum Debt {
@@ -194,4 +187,23 @@ export interface Paging {
   pageIndex: number;
   pageSize: number;
   total: number;
+}
+
+export interface PaginationParams {
+  p?: number;
+  ps?: number;
+  s?: string;
+  asc?: boolean;
+  facets?: string;
+  componentKeys?: string;
+}
+
+export enum truthyPaginationParam {
+  YES = 'yes',
+  TRUE = 'true',
+}
+
+export interface RequestPaginationsArgs {
+  paginationParams?: PaginationParams;
+  auth?: AxiosBasicCredentials;
 }

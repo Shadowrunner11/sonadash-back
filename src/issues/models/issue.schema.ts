@@ -15,7 +15,7 @@ export enum Severity {
   Minor = 'MINOR',
 }
 
-@Schema()
+@Schema({ autoIndex: true, timestamps: true })
 export class Issue {
   @Prop()
   sonarKey: string;
@@ -38,7 +38,7 @@ export class Issue {
   @Prop()
   developerEmail: string;
 
-  @Prop()
+  @Prop({ index: 'asc' })
   date: Date;
 
   @Prop()
@@ -48,3 +48,5 @@ export class Issue {
 export type IssueDocument = HydratedDocument<Issue>;
 
 export const IssueSchema = SchemaFactory.createForClass(Issue);
+
+IssueSchema.index({ date: 'asc' });

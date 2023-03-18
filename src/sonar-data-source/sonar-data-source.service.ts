@@ -1,19 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios, { AxiosBasicCredentials, AxiosInstance } from 'axios';
-import { IssuesResponse, ProjectsResponse } from './types';
+import axios, { AxiosInstance } from 'axios';
+import {
+  FacetValues,
+  IssuesResponse,
+  ProjectsResponse,
+  RequestPaginationsArgs,
+} from './types';
 
 const defaultSonarAPI_URL = 'https://sonarqube.innovacionpacifico.com/api';
-
-interface PaginationParams {
-  p?: number;
-  ps?: number;
-}
-
-interface RequestPaginationsArgs {
-  paginationParams?: PaginationParams;
-  auth?: AxiosBasicCredentials;
-}
 
 // TODO: what the h..., axios should be a dependency injection, we are violating IoC
 
@@ -44,6 +39,38 @@ export class SonarDataSourceService {
     });
 
     return data;
+  }
+
+  async getSingleFacets(
+    facetValue: FacetValues,
+    requestOptions?: RequestPaginationsArgs,
+  ) {
+    const { auth, paginationParams } = requestOptions ?? {};
+
+    const { facets } = await this.getPaginatedIssues({
+      auth,
+      paginationParams: {
+        ...paginationParams,
+        facets: facetValue,
+      },
+    });
+
+    return facets.find(({ property }) => property === facetValue)?.values;
+  }
+
+  getSingleFacetsByProject(
+    faceValue: FacetValues,
+    projectKey: string,
+    requestOptions?: RequestPaginationsArgs,
+  ) {
+    const { auth, paginationParams } = requestOptions ?? {};
+    return this.getSingleFacets(faceValue, {
+      auth,
+      paginationParams: {
+        ...paginationParams,
+        componentKeys: projectKey,
+      },
+    });
   }
 
   getPaginatedProject(requestOptions?: RequestPaginationsArgs) {
@@ -93,42 +120,6 @@ export class SonarDataSourceService {
     return this.getPaginatedData<IssuesResponse>(
       '/issues/search',
       requestOptions,
-    );
-  }
-
-  async getAllIssues(requestOptions?: RequestPaginationsArgs) {
-    const { paginationParams, auth } = requestOptions ?? {};
-
-    const { ps = 500, p = 1 } = paginationParams ?? {};
-    const {
-      paging: { total },
-      issues: firstIssues,
-    } = await this.getPaginatedIssues({
-      ...requestOptions,
-      paginationParams: {
-        p,
-        ps,
-      },
-    });
-
-    const pages = Math.round(total / ps) - 1;
-
-    const emptyIterationsArray = Array.from(Array(pages));
-
-    const nextProjectsResponse = await Promise.all(
-      emptyIterationsArray.map((_, index) =>
-        this.getPaginatedIssues({
-          auth,
-          paginationParams: {
-            p: index + 2,
-            ps,
-          },
-        }),
-      ),
-    );
-
-    return firstIssues.concat(
-      nextProjectsResponse.flatMap(({ issues }) => issues),
     );
   }
 }

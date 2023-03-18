@@ -5,6 +5,7 @@ import { ProjectsService } from './projects.service';
 import { ProjectsController } from './projects.controller';
 import { ProjectsMigrationService } from './projects.migration.service';
 import { SonarDataSourceModule } from 'src/sonar-data-source/sonar-data-source.module';
+import { ProjectsResolver } from './project.resolver';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { SonarDataSourceModule } from 'src/sonar-data-source/sonar-data-source.m
     ]),
     SonarDataSourceModule,
   ],
-  providers: [ProjectsService, ProjectsMigrationService],
+  providers: [ProjectsService, ProjectsMigrationService, ProjectsResolver],
   controllers: [ProjectsController],
 })
 export class ProjectsModule {}
