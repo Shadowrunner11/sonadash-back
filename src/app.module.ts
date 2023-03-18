@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CatsModule } from './cats/cats.module';
 import { IssuesModule } from './issues/issues.module';
 import { SonarDataSourceModule } from './sonar-data-source/sonar-data-source.module';
+import { ProjectsModule } from './projects/projects.module';
 
 enum envProps {
   MONGO_URI = 'MONGODB_URI',
@@ -22,6 +23,7 @@ enum envProps {
     }),
     CatsModule,
     IssuesModule,
+    ProjectsModule,
     SonarDataSourceModule,
   ],
   controllers: [AppController],
