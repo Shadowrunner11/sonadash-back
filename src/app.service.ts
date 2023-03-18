@@ -6,7 +6,7 @@ import Axios, { AxiosInstance } from 'axios';
 export class AppService {
   private axiosClient: AxiosInstance;
   constructor(private configService: ConfigService) {
-    const token = this.configService.getOrThrow<string>('TOKEN_SONAR');
+    const token = this.configService.getOrThrow<string>('SONAR_TOKEN');
     const baseURL = this.configService.get<string>('SONAR_API_URL');
     this.axiosClient = Axios.create({
       baseURL,

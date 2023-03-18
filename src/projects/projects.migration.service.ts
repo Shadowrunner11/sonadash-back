@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { SonarDataSourceService } from 'src/sonar-data-source/sonar-data-source.service';
+import { SonarDataSourceService } from 'src/sonar-data-source/sonar-data-source.service';
 import { ProjectsDocument } from './models/projects.schema';
 import type { Model } from 'mongoose';
 
@@ -8,6 +8,7 @@ import type { Model } from 'mongoose';
 export class ProjectsMigrationService {
   constructor(
     @InjectModel('project') private projectModel: Model<ProjectsDocument>,
+    @Inject(SonarDataSourceService)
     private sonarDataSource: SonarDataSourceService,
   ) {}
 
