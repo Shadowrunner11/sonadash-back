@@ -56,4 +56,7 @@ export class IssuesFilter extends TimeStampsFilter {
 
   @Field({ nullable: true })
   issuedUpdatedAt?: TimeFilter;
+
+  @Field({ nullable: true })
+  status: FilterItemString;
 }

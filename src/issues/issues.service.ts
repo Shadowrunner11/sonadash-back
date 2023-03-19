@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { PaginationParams, sonarCollections } from 'src/types';
 import { Issue, IssueDocument } from './models/issue.schema';
@@ -11,6 +11,7 @@ import { omit } from 'lodash';
 
 @Injectable()
 export class IssuesService {
+  private readonly logger = new Logger(IssuesService.name);
   constructor(
     @InjectModel(sonarCollections.ISSUES)
     private issueModel: Model<IssueDocument>,
@@ -29,7 +30,7 @@ export class IssuesService {
   }
 
   async createReport(filter?: IssuesFilter, fields?: (keyof typeof Issue)[]) {
-    console.log(fields);
+    this.logger.debug(filter);
     const parsedFilter = filter ? buildFilter({ ...filter }) : {};
     const issues = await this.issueModel.find(parsedFilter).lean();
     const header = (
