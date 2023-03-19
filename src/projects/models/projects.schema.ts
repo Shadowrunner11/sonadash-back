@@ -1,3 +1,4 @@
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import type { HydratedDocument } from 'mongoose';
 
@@ -11,27 +12,35 @@ export enum Visibility {
   visibility = 'PUBLIC',
 }
 
+@ObjectType()
 @Schema({ timestamps: true })
 export class Projects {
   @Prop()
+  @Field()
   sonarKey: string;
 
   @Prop()
+  @Field()
   name: string;
 
   @Prop()
+  @Field()
   qualifier: Qualifier;
 
   @Prop()
+  @Field({ nullable: true })
   isFavorite?: boolean;
 
   @Prop()
-  tags: [string?];
+  @Field(() => [String], { nullable: 'items' })
+  tags: string[];
 
   @Prop()
+  @Field()
   visibility: Visibility;
 
   @Prop()
+  @Field({ nullable: true })
   needIssueSync?: boolean;
 }
 

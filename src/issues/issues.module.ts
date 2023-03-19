@@ -7,6 +7,7 @@ import { QueueModule } from 'src/queue/queue.module';
 import { IssuesController } from './issues.controller';
 import { IssuesMigrationService } from './issues.migration.service';
 import { SonarDataSourceModule } from 'src/sonar-data-source/sonar-data-source.module';
+import { IssuesResolver } from './issues.resolver';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { SonarDataSourceModule } from 'src/sonar-data-source/sonar-data-source.m
     QueueModule,
     SonarDataSourceModule,
   ],
-  providers: [IssuesService, IssuesMigrationService],
+  providers: [IssuesService, IssuesMigrationService, IssuesResolver],
   controllers: [IssuesController],
 })
 export class IssuesModule {}

@@ -1,12 +1,7 @@
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import type { HydratedDocument } from 'mongoose';
-
-export enum IssueObservations {
-  Bug = 'BUG',
-  CodeSmell = 'CODE_SMELL',
-  DuplicatedCode = 'CODIGO_DUPLICADO',
-  Cobertura = 'COBERTURA',
-}
+import { Type } from 'src/sonar-data-source/types';
 
 export enum Severity {
   Blocker = 'BLOCKER',
@@ -15,53 +10,70 @@ export enum Severity {
   Minor = 'MINOR',
 }
 
+@ObjectType()
 @Schema({ autoIndex: true, timestamps: true })
 export class Issue {
+  @Field()
   @Prop({ unique: true })
   sonarKey: string;
 
+  @Field()
   @Prop()
-  observation: IssueObservations;
+  observation: Type;
 
+  @Field()
   @Prop()
   severity: Severity;
 
+  @Field()
   @Prop()
   language: string;
 
+  @Field()
   @Prop()
   rule: string;
 
+  @Field()
   @Prop()
   startLine: number;
 
+  @Field({ nullable: true })
   @Prop()
   developerEmail?: string;
 
+  @Field()
   @Prop({ index: 'asc' })
   issueCreatedAt: Date;
 
+  @Field()
   @Prop()
   issueUpdatedAt?: Date;
 
+  @Field({ nullable: true })
   @Prop()
   sonarHash?: string;
 
+  @Field()
   @Prop()
   status?: string;
 
+  @Field({ nullable: true })
   @Prop()
   scope?: string;
 
+  @Field(() => [String], { nullable: 'itemsAndList' })
   @Prop()
   tags?: string[];
 
+  @Field({ nullable: true })
   @Prop()
   sonarRuleMessage?: string;
 
+  @Field()
   @Prop()
   file: string;
 
+  @Field()
   @Prop()
   project: string;
 }

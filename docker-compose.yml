@@ -7,8 +7,19 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USER} 
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: sonar
+      MONGO_INITDB_DATABASE: sonarqube
     ports:
       - 27017:27017
     volumes:
       - ${HOME}/sonar/mongo:/data/db
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_ROOT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+      POSTGRES_DB: sonarqube
+    ports:
+      - 5432:5432
+    volumes:
+      - ${HOME}/sonar/postgres:/var/lib/postgresql/data

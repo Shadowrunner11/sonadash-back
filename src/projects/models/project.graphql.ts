@@ -1,10 +1,14 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Projects } from './projects.schema';
 
 @ObjectType()
-export class Project {
+export class Project extends Projects {
   @Field(() => ID)
   _id: string;
 
   @Field()
-  name?: string;
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
 }

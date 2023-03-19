@@ -1,4 +1,5 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { WithPagination } from 'src/tools/graphql/entitites/pagination.graphql';
 
 @ObjectType()
 export class Author {
@@ -10,22 +11,25 @@ export class Author {
 }
 
 @ObjectType()
-export class PaginationInfo {
-  @Field(() => Int)
-  page: number;
-
-  @Field(() => Int)
-  total: number;
-
-  @Field(() => Boolean)
-  hasNext: boolean;
-}
-
-@ObjectType()
-export class AuthorPagination {
+export class PaginatedAuthors extends WithPagination {
   @Field(() => [Author])
   data: Author[];
+}
 
-  @Field(() => PaginationInfo)
-  pagination: PaginationInfo;
+@InputType()
+export class TimeFilter {
+  @Field({ nullable: true })
+  beforeDate?: Date;
+
+  @Field({ nullable: true })
+  afterDate?: Date;
+}
+
+@InputType()
+export class TimeStampsFilter {
+  @Field({ nullable: true })
+  createdAtFilter: TimeFilter;
+
+  @Field({ nullable: true })
+  updatedAtFilter: TimeFilter;
 }

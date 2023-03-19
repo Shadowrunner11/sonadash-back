@@ -2,9 +2,10 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Project {
-  _id: ID!
-  name: String!
+type PaginationInfo {
+  page: Int!
+  total: Int!
+  hasNext: Boolean
 }
 
 type Author {
@@ -12,18 +13,89 @@ type Author {
   email: String!
 }
 
-type PaginationInfo {
-  page: Int!
-  total: Int!
-  hasNext: Boolean!
+type PaginatedAuthors {
+  pagination: PaginationInfo!
+  data: [Author!]!
 }
 
-type AuthorPagination {
-  data: [Author!]!
+type Issue {
+  sonarKey: String!
+  observation: String!
+  severity: String!
+  language: String!
+  rule: String!
+  startLine: Float!
+  developerEmail: String
+  issueCreatedAt: DateTime!
+  issueUpdatedAt: DateTime!
+  sonarHash: String
+  status: String!
+  scope: String
+  tags: [String]
+  sonarRuleMessage: String
+  file: String!
+  project: String!
+  _id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type PaginatedIssues {
   pagination: PaginationInfo!
+  data: [Issue]!
+}
+
+type Project {
+  sonarKey: String!
+  name: String!
+  qualifier: String!
+  isFavorite: Boolean
+  tags: [String]!
+  visibility: String!
+  needIssueSync: Boolean
+  _id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Query {
+  issue(_id: ID!): Issue!
+  paginatedIssues(page: Int!, limit: Int! = 10, filter: IssuesFilter): PaginatedIssues!
   project(_id: ID!): Project!
-  authors(page: Int!, limit: Float! = 10): AuthorPagination!
+  paginatedAuthors(page: Int!, limit: Float! = 10): PaginatedAuthors!
+}
+
+input IssuesFilter {
+  createdAtFilter: TimeFilter
+  updatedAtFilter: TimeFilter
+  _ids: FilterItemsString
+  sonarKeys: FilterItemsString
+  observations: FilterItemsString
+  developerEmails: FilterItemsString
+  file: FilterItemString
+  scope: FilterItemString
+  rules: FilterItemsString
+  projects: FilterItemsString
+  issueCreatedAt: TimeFilter
+  issuedUpdatedAt: TimeFilter
+}
+
+input TimeFilter {
+  beforeDate: DateTime
+  afterDate: DateTime
+}
+
+input FilterItemsString {
+  isExclusion: Boolean
+  values: [String!]!
+}
+
+input FilterItemString {
+  isExclusion: Boolean
+  value: String!
 }

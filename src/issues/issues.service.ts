@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { sonarCollections } from 'src/types';
-import { IssueDocument } from './models/issue.schema';
+import { PaginationParams, sonarCollections } from 'src/types';
+import { Issue, IssueDocument } from './models/issue.schema';
 import { CreateIssuesDTO } from './types';
 import { InjectModel } from '@nestjs/mongoose';
+import { buildFilter, getPaginatedResults } from 'src/tools';
+import { IssuesFilter } from './models/issue.graphql';
+import { createObjectCsvStringifier } from 'csv-writer';
+import { omit } from 'lodash';
 
 @Injectable()
 export class IssuesService {
@@ -14,5 +18,26 @@ export class IssuesService {
 
   create(createIssueDTO: CreateIssuesDTO) {
     return this.issueModel.create(createIssueDTO);
+  }
+
+  findById(id: string) {
+    return this.issueModel.findById(id);
+  }
+
+  getPaginatedIssues(params: PaginationParams, filter?: IssuesFilter) {
+    return getPaginatedResults(this.issueModel, params, { ...filter });
+  }
+
+  async createReport(filter?: IssuesFilter, fields?: Omit<Issue, '_id'>) {
+    const parsedFilter = filter ? buildFilter({ ...filter }) : {};
+    const issues = await this.issueModel.find(parsedFilter).lean();
+    const header = Object.keys(
+      fields ??
+        omit(this.issueModel.schema.obj, ['_id', 'createdAt', 'updatedAt']),
+    ).map((key) => ({ id: key, title: key }));
+
+    const csvWriter = createObjectCsvStringifier({ header });
+
+    return csvWriter.getHeaderString() + csvWriter.stringifyRecords(issues);
   }
 }
