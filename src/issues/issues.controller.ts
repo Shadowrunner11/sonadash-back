@@ -21,7 +21,7 @@ class MigrateLimitDTO implements IssuesLimitedOptions {
 
 interface IBodyReport {
   readonly filters: IssuesFilter;
-  readonly fields: Omit<Issue, '_id'>;
+  readonly fields: (keyof typeof Issue)[];
 }
 
 @ApiTags('issues', 'auth')

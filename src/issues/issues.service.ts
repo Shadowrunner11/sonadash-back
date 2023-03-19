@@ -28,12 +28,15 @@ export class IssuesService {
     return getPaginatedResults(this.issueModel, params, { ...filter });
   }
 
-  async createReport(filter?: IssuesFilter, fields?: Omit<Issue, '_id'>) {
+  async createReport(filter?: IssuesFilter, fields?: (keyof typeof Issue)[]) {
+    console.log(fields);
     const parsedFilter = filter ? buildFilter({ ...filter }) : {};
     const issues = await this.issueModel.find(parsedFilter).lean();
-    const header = Object.keys(
+    const header = (
       fields ??
+      Object.keys(
         omit(this.issueModel.schema.obj, ['_id', 'createdAt', 'updatedAt']),
+      )
     ).map((key) => ({ id: key, title: key }));
 
     const csvWriter = createObjectCsvStringifier({ header });
