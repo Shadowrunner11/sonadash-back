@@ -30,6 +30,7 @@ enum envProps {
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      introspection: !process.env.IS_DISABLED_INTROSPECTION,
     }),
     IssuesModule,
     ProjectsModule,
@@ -43,6 +44,6 @@ enum envProps {
 export class AppModule {
   static port: number;
   constructor(private config: ConfigService) {
-    AppModule.port = config.get<number>('PORT', 3000);
+    AppModule.port = this.config.get<number>('PORT', 3000);
   }
 }
