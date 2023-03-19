@@ -1,4 +1,11 @@
-import { Body, Controller, Header, Headers, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Header,
+  Headers,
+  Logger,
+  Post,
+} from '@nestjs/common';
 import { IssuesMigrationService } from './issues.migration.service';
 import { ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
 import type { IncomingHttpHeaders } from 'http';
@@ -27,6 +34,7 @@ interface IBodyReport {
 @ApiTags('issues', 'auth')
 @Controller('issues')
 export class IssuesController {
+  private readonly logger = new Logger(IssuesController.name);
   constructor(
     private readonly migrationService: IssuesMigrationService,
     private readonly issueService: IssuesService,
@@ -42,11 +50,11 @@ export class IssuesController {
 
     const parsedAuth = auth ? getCredentialsFromBasicAuth(auth) : undefined;
 
-    this.migrationService.migrateAllLimitedIssues(
-      pageSize,
-      pagesLimit,
-      parsedAuth,
-    );
+    this.migrationService
+      .migrateAllLimitedIssues(pageSize, pagesLimit, parsedAuth)
+      .catch((error) => {
+        this.logger.error(error);
+      });
 
     // TODO: inject dataSource to check for validation
     // TODO: or create a collection of migration status and return process id
