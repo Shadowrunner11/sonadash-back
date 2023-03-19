@@ -31,6 +31,7 @@ enum envProps {
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       introspection: !process.env.IS_DISABLED_INTROSPECTION,
+      csrfPrevention: true,
     }),
     IssuesModule,
     ProjectsModule,
