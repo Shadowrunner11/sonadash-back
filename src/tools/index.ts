@@ -6,6 +6,7 @@ import {
   FilterItemsString,
 } from './graphql/entitites/pagination.graphql';
 import { TimeFilter } from 'src/author/models/author.grapqhl';
+import { Logger } from '@nestjs/common';
 
 export const getFileExtension = (filePath: string) =>
   filePath?.split('.')?.pop() || filePath;
@@ -54,16 +55,23 @@ export const buildListItemsFilter = ({
 };
 
 export const buildItemsFilter = (
-  filterData: FilterItemsString | FilterItemString,
+  filterData: FilterItemString | FilterItemsString,
 ) => {
-  if (filterData instanceof FilterItemString)
-    return buildItemFilter(filterData);
+  if (filterData instanceof FilterItemString || !filterData.values)
+    return buildItemFilter(filterData as FilterItemString);
 
   return buildListItemsFilter(filterData);
 };
 
+const defaultblackListSingularize = Object.freeze(['status']);
+
 // TODO: add default black list of items to singularize
-export const singularize = (word: string) => {
+export const singularize = (
+  word: string,
+  blackList = defaultblackListSingularize,
+) => {
+  if (blackList.includes(word)) return word;
+
   const lastLetter = word.charAt(word.length - 1);
 
   if (lastLetter === 's') return word.substring(0, word.length - 1);
@@ -76,15 +84,17 @@ export const buildTimeFitler = ({ afterDate, beforeDate }: TimeFilter) => ({
   ...(beforeDate ? { $lte: beforeDate } : {}),
 });
 
+//TODO: it is not correct to cast as any, th problem is that filter passed from request has not prototype for securtyri reasons
+// create an entity factory to solve this problem
 export const buildFilter = (filter: IFilters) =>
   Object.keys(filter).reduce(
     (finalFilter: Record<string, unknown>, nextFilter) => {
-      const filterData = filter[nextFilter];
+      const filterData: any = filter[nextFilter];
 
       const fieldName = singularize(nextFilter);
 
-      if (filterData instanceof TimeFilter) {
-        finalFilter[fieldName] = buildTimeFitler(filterData);
+      if (filterData.afterDate || filterData.beforeDate) {
+        finalFilter[fieldName] = buildTimeFitler(filterData as TimeFilter);
         return finalFilter;
       }
 
@@ -102,10 +112,12 @@ export const getPaginatedResults = async <T = unknown>(
   { page, limit = 10 }: PaginationParams,
   filter?: IFilters,
 ) => {
+  const logger = new Logger();
   const skip = (page - 1) * limit;
-  const total = await model.count();
-
+  logger.debug(filter);
   const parsedFilter = filter ? buildFilter(filter) : {};
+  logger.debug(parsedFilter);
+  const total = await model.count(parsedFilter);
 
   const data = await model.find(parsedFilter).skip(skip).limit(limit).lean();
 
