@@ -8,7 +8,6 @@ async function bootstrap() {
   app.setGlobalPrefix('api', {
     exclude: ['graphql'],
   });
-  app.enableCors();
 
   const config = new DocumentBuilder()
     .setTitle('Sonar qube migrations and reporting')

@@ -136,12 +136,22 @@ export class IssuesMigrationService {
     this.issueModel.create();
 
     const maxPageLimit = Math.round(
-      Math.min(this.limitElasticSearch, pagesLimit, total / pageSize),
+      Math.min(
+        this.limitElasticSearch / pageSize,
+        pagesLimit,
+        total / pageSize,
+      ),
     );
 
     this.logger.log(`Starting offset migration ${maxPageLimit} pages`);
 
-    for (let index = 2; index < maxPageLimit; index++) {
+    for (let index = 2; index <= maxPageLimit; index++) {
+      this.logger.log(
+        `Startting partial migration ${JSON.stringify({
+          ...paginationParams,
+          p: index,
+        })}`,
+      );
       await this.migrateIssues({
         auth,
         paginationParams: {
