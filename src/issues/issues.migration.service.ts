@@ -10,12 +10,21 @@ import {
   RequestPaginationsArgs,
 } from 'src/sonar-data-source/types';
 import { AxiosBasicCredentials } from 'axios';
-import { getFirstLanguageFromFile } from 'src/tools';
+import { formatISOWithTUTCDate, getFirstLanguageFromFile } from 'src/tools';
 import { sonarCollections } from 'src/types';
+import { keyBy } from 'lodash';
+
+interface TimePeriodArgs {
+  days?: number;
+  months?: number;
+  weeks?: number;
+  years?: number;
+}
 
 @Injectable()
 export class IssuesMigrationService {
   private readonly logger = new Logger(IssuesMigrationService.name);
+  private readonly limitElasticSearch = 10_000;
   constructor(
     @InjectModel(sonarCollections.ISSUES)
     private issueModel: Model<IssueDocument>,
@@ -29,8 +38,11 @@ export class IssuesMigrationService {
       type: observation,
       line: startLine = 0,
       author: developerEmail,
-      creationDate: date,
+      creationDate: issueCreatedAt,
       component: file,
+      updateDate: issueUpdatedAt,
+      message: sonarRuleMessage,
+      hash: sonarHash,
       ...rest
     } = issue;
 
@@ -39,9 +51,12 @@ export class IssuesMigrationService {
       observation,
       startLine,
       developerEmail,
-      date,
+      issueCreatedAt,
       language: getFirstLanguageFromFile(file),
       file,
+      issueUpdatedAt,
+      sonarRuleMessage,
+      sonarHash,
       ...rest,
     };
   }
@@ -61,10 +76,18 @@ export class IssuesMigrationService {
 
   async migrateIssues(requestParams?: RequestPaginationsArgs) {
     const parsedIssues = await this.getParsedPaginatedIssues(requestParams);
-
     const { issues } = parsedIssues;
+    const alreadyPushed = await this.issueModel.find({
+      sonarKey: { $in: issues.map(({ sonarKey }) => sonarKey) },
+    });
 
-    await this.issueModel.create(issues);
+    const alreadyPushedBy = keyBy(alreadyPushed, 'sonarKey');
+
+    const filteredIssues = issues.filter(
+      ({ sonarKey }) => !alreadyPushedBy[sonarKey],
+    );
+
+    await this.issueModel.create(filteredIssues);
 
     this.logger.log(
       `Finished partial migration of ${JSON.stringify({
@@ -79,12 +102,12 @@ export class IssuesMigrationService {
     const [mostRecentIssue] = await this.issueModel
       .find({})
       .sort({
-        date: 'desc',
+        issueCreatedAt: 'desc',
       })
       .limit(1)
       .lean();
 
-    return mostRecentIssue?.date;
+    return mostRecentIssue?.issueCreatedAt;
   }
 
   async migrateAllLimitedIssues(
@@ -94,18 +117,13 @@ export class IssuesMigrationService {
   ) {
     pageSize = pageSize <= 500 ? pageSize : 500;
 
-    const limitElasticSearch = 10_000;
-
     const date = await this.getLatestDate();
-
-    console.log(date);
 
     const paginationParams: PaginationParams = {
       asc: true,
       ps: pageSize,
-      // TODO: pasar a enum
       s: 'CREATION_DATE',
-      // TODO: implementar filtro de fecha
+      ...(date ? { createdAfter: formatISOWithTUTCDate(date) } : {}),
     };
 
     const {
@@ -117,13 +135,13 @@ export class IssuesMigrationService {
 
     this.issueModel.create();
 
-    const maxPageLimit = Math.min(
-      limitElasticSearch,
-      pagesLimit,
-      total / pageSize,
+    const maxPageLimit = Math.round(
+      Math.min(this.limitElasticSearch, pagesLimit, total / pageSize),
     );
 
-    for (let index = 2; index <= maxPageLimit; index++) {
+    this.logger.log(`Starting offset migration ${maxPageLimit} pages`);
+
+    for (let index = 2; index < maxPageLimit; index++) {
       await this.migrateIssues({
         auth,
         paginationParams: {
@@ -131,8 +149,66 @@ export class IssuesMigrationService {
           p: index,
         },
       });
+      this.logger.log(`Finished partial migration ${index} of ${maxPageLimit}`);
     }
 
     this.logger.log('Finishing migration');
+  }
+
+  private formatSinglePeriod(sufix: string, qty?: number) {
+    return qty ? qty + sufix : '';
+  }
+
+  private formatPeriodOfTime(periodOfTime: TimePeriodArgs) {
+    return ['years', 'months', 'weeks', 'days', 'hours'].reduce(
+      (prev, periodKey) => {
+        const periodQty = periodOfTime[periodKey as keyof typeof periodOfTime];
+        const [sufix] = periodKey;
+
+        return prev + this.formatSinglePeriod(sufix, periodQty);
+      },
+      '',
+    );
+  }
+
+  async migrateByTimePeriod(
+    periodOfTime: TimePeriodArgs,
+    requestParams?: RequestPaginationsArgs,
+  ) {
+    const { auth, paginationParams } = requestParams ?? {};
+
+    const createdInLast = this.formatPeriodOfTime(periodOfTime);
+    const {
+      paging: { total, pageSize, pageIndex },
+    } = await this.migrateIssues({
+      auth,
+      paginationParams: {
+        ...paginationParams,
+        createdInLast,
+      },
+    });
+
+    const maxPageLimit = Math.round(
+      Math.min(this.limitElasticSearch, total / pageSize),
+    );
+
+    const emptyArray = Array.from(Array(maxPageLimit));
+
+    return Promise.all(
+      emptyArray.map((_, index) =>
+        this.migrateIssues({
+          auth,
+          paginationParams: {
+            ...paginationParams,
+            p: pageIndex + index + 2,
+            createdInLast,
+          },
+        }),
+      ),
+    );
+  }
+
+  migrateLastWeek() {
+    return this.migrateByTimePeriod({ weeks: 1 });
   }
 }

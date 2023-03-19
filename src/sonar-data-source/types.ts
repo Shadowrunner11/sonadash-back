@@ -196,6 +196,8 @@ export interface PaginationParams {
   asc?: boolean;
   facets?: string;
   componentKeys?: string;
+  createdInLast?: string;
+  createdAfter?: string;
 }
 
 export enum truthyPaginationParam {

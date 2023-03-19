@@ -17,7 +17,7 @@ export enum Severity {
 
 @Schema({ autoIndex: true, timestamps: true })
 export class Issue {
-  @Prop()
+  @Prop({ unique: true })
   sonarKey: string;
 
   @Prop()
@@ -36,13 +36,34 @@ export class Issue {
   startLine: number;
 
   @Prop()
-  developerEmail: string;
+  developerEmail?: string;
 
   @Prop({ index: 'asc' })
-  date: Date;
+  issueCreatedAt: Date;
+
+  @Prop()
+  issueUpdatedAt?: Date;
+
+  @Prop()
+  sonarHash?: string;
+
+  @Prop()
+  status?: string;
+
+  @Prop()
+  scope?: string;
+
+  @Prop()
+  tags?: string[];
+
+  @Prop()
+  sonarRuleMessage?: string;
 
   @Prop()
   file: string;
+
+  @Prop()
+  project: string;
 }
 
 export type IssueDocument = HydratedDocument<Issue>;

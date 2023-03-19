@@ -7,7 +7,16 @@ export interface CreateIssuesDTO {
   language: string;
   rule: string;
   startLine: number;
-  developerEmail: string;
-  date: Date;
+  developerEmail?: string;
+  issueCreatedAt: Date;
+  issueUpdatedAt?: Date;
+  sonarHash?: string;
+  // TODO: use enums
+  status?: string;
+  // TODO: use enums
+  scope?: string;
+  tags?: string[];
+  sonarRuleMessage?: string;
   file: string;
+  project: string;
 }

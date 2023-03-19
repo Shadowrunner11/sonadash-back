@@ -8,6 +8,9 @@ import { FacetValues, Value } from 'src/sonar-data-source/types';
 import { ProjectsDocument } from 'src/projects/models/projects.schema';
 import { keyBy } from 'lodash';
 import { CreateAuthorsDTO } from './types';
+import dayjs from 'dayjs';
+import { AxiosBasicCredentials } from 'axios';
+import { formatISOWithTUTCDate } from 'src/tools';
 
 @Injectable()
 export class AuthorMigrationService {
@@ -44,7 +47,7 @@ export class AuthorMigrationService {
 
   async migrateAllAuthor(batchSize = 10) {
     // eslint-disable-next-line no-console
-    console.time('migrating time');
+    console.time('migration time');
     const projects = await this.projectModel
       .find()
       .sort({
@@ -92,8 +95,21 @@ export class AuthorMigrationService {
     console.timeEnd('migration time');
   }
 
-  async migrateLatestAuthors(strategy = 'week') {
-    // TODO: implement migration process that will take a week as a limit
-    return;
+  async migrateLatestAuthors(
+    date = dayjs().subtract(1, 'week').toDate(),
+    auth?: AxiosBasicCredentials,
+  ) {
+    const { facets } = await this.sonarDataSource.getPaginatedIssues({
+      auth,
+      paginationParams: {
+        ps: 500,
+        facets: FacetValues.AUTHORS,
+        createdAfter: formatISOWithTUTCDate(date),
+      },
+    });
+
+    const authors = facets.flatMap(({ values }) => values);
+
+    return this.createAuthors(authors);
   }
 }

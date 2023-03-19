@@ -1,4 +1,4 @@
-import { Resolver, Query, Args, ID, Int } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { Author, AuthorPagination } from './models/author.grapqhl';
 import { AuthorService } from './author.service';
 

@@ -14,3 +14,6 @@ export function getFirstLanguageFromFile(filePath: string) {
     return 'File type not identified';
   }
 }
+
+export const formatISOWithTUTCDate = (date: Date) =>
+  date.toISOString().replace(/\..+Z/i, '+0000');

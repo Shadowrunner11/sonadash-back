@@ -30,6 +30,7 @@
     "@nestjs/platform-express": "^9.0.0",
     "axios": "^1.3.4",
     "better-queue": "^3.8.12",
+    "dayjs": "^1.11.7",
     "graphql": "^16.6.0",
     "lang-map": "^0.4.0",
     "lodash": "^4.17.21",
