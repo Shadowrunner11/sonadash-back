@@ -1,73 +1,72 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Reporting system
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Bootstrapeado con nextjs, este monolito expone servicios de migracion de data desde una api de sonar qube a su propia base
+de datos mongoDB debido a las limitaciones que tiene la api de sonar qube respecto a la cantidad de issues que excede
+el limite impuesto por su naturaleza la usar elastic search
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Tambien expone un servicio de creacion de reportes y una api GRAPHQL que se alimenta del a bd de mongo
+esto para mayor disponibilidad de la data con propositos de obsevavilidad y visualziacion de datos
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
-
+## Bootstraping
+Para iniciar en modo desarollo
 ```bash
-$ yarn install
+$ yarn start:dev
 ```
 
-## Running the app
+Si se tiene errores hay muchas causas las mas probable involucran
+- No se proveyo una conexion a una base de mongoDB
+- El puerto donde se corre la app ya esta ocupado
 
-```bash
-# development
-$ yarn run start
+Para estas revisar el archivo .envexample y setear las envs necesarias
 
-# watch mode
-$ yarn run start:dev
+## Migraciones
+La env `SONAT_TOKEN` es opcional, si se quiere hacer las migraciones sin pasar autorizacion se puede setear el valor
+de otro modo las migraciones fallaran, por el momento silenciosamente.
 
-# production mode
-$ yarn run start:prod
-```
+Si queremos usar las migraciones sin setear el token en las envs, pasar un token en los request 
+como username de la autorizacion, es autorizacion basica
 
-## Test
+## Graphql
+Se activo el playground, solo visitar `http://localhost:<el puerto q seteaste en las envs o 3000 por defecto>/grapqhl`
+este es un playground embebido de grahphi
 
-```bash
-# unit tests
-$ yarn run test
+Si se quiere usar el playground del entorno desplegado en dev no se podra, a menos q se use apollo studio pero
+no lo recomiendo por la lentitud, mejor en local
 
-# e2e tests
-$ yarn run test:e2e
+## Bases de datos
+Se incluye un docker compose que tiene configuracion para las bases de datos
+esta depende de los enviroments, se recomienda setearlas desde un inicio
 
-# test coverage
-$ yarn run test:cov
-```
+Por el momento basta con la imagen de mongoDB, no es neceario relamente correr la de postgres
+se puede incluso trabajar con una istnacia cualquiera de mongo q se tenga corriendo, pero
+si no seconfigura los volumenes recordar q se perdera toda la informacion cuando se cierre 
+el container q tiene a mongo
 
-## Support
+El archivo de docker compose tiene perssitencia sencilla, si se usa no se perdera la informacion
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+La base de postgres servira para los logs y usuarios pero es una funcionalidad pendiente
 
-## Stay in touch
+## Arquitectura
+next nos invita siempre a usar una arquitectura que permite la maxima modularuizacion, muy comptaible con la arui hexagonal ya que cada modulo tiene nsus propias funcionalidades a diferencia de otras arquitecturas donde tenemos carpetas dedicadas a cada capa como la onion
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Entonces si queremos encontrar algun comportamiento relaciondo por ejemplo con los issues lo encontraremos en la carpeta de issues, como sus migraciones y esquemas
+y resolvers para graphql
 
-## License
+## Esquemas
+Para permitir maxima reutilizacion, se sigue la sugerencia de next de reutilziar los esquemas por ejemplo de mongoDb como esquemas
+de grapqhl (code first), para ello nos valemos de decoradores. Esto puede llevar a errores poco informativos si
+no se entiende bien lo q se esta realizando, tener cuidado
 
-Nest is [MIT licensed](LICENSE).
+## Herramientas
+Se recomienda leer la documentacion de las herramientas de terceros q se instalo cuando sea necesario
+ - Problemas con fechas como formateo?
+    - Se instalo daysjs
+ - Problemas con complejidad y manupulacion de arrays y objetos?
+    - Se instalo lodash
+ - Exportar csv (se parece a excel, se puede leer como spreadsheet o mejor dicho hoja de calculo)?
+    - Se instalo csv- writter
+ - Peticiones HTTP a otros servicios como Sonar?
+    -Se instalo axios 
+
+Siempre revisar el package.json , la parte de "dependencies" para ver 
+si ya hay una libreria q soluciona el problema q estes presentando
