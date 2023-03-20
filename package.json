@@ -88,6 +88,6 @@
     "node": ">=16"
   },
   "lint-staged": {
-    "*.{ts}": "eslint --cache --fix"
+    "*.ts": "eslint --cache --fix"
   }
 }
