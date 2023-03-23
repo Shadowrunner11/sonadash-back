@@ -32,35 +32,6 @@ export class IssuesMigrationService {
     private sonarDataSource: SonarDataSourceService,
   ) {}
 
-  private parseIssue(issue: Issue): CreateIssuesDTO {
-    const {
-      key: sonarKey,
-      type: observation,
-      line: startLine = 0,
-      author: developerEmail,
-      creationDate: issueCreatedAt,
-      component: file,
-      updateDate: issueUpdatedAt,
-      message: sonarRuleMessage,
-      hash: sonarHash,
-      ...rest
-    } = issue;
-
-    return {
-      sonarKey,
-      observation,
-      startLine,
-      developerEmail,
-      issueCreatedAt,
-      language: getFirstLanguageFromFile(file),
-      file,
-      issueUpdatedAt,
-      sonarRuleMessage,
-      sonarHash,
-      ...rest,
-    };
-  }
-
   private async getParsedPaginatedIssues(
     requestParams?: RequestPaginationsArgs,
   ) {
@@ -220,5 +191,34 @@ export class IssuesMigrationService {
 
   migrateLastWeek() {
     return this.migrateByTimePeriod({ weeks: 1 });
+  }
+
+  private parseIssue(issue: Issue): CreateIssuesDTO {
+    const {
+      key: sonarKey,
+      type: observation,
+      line: startLine = 0,
+      author: developerEmail,
+      creationDate: issueCreatedAt,
+      component: file,
+      updateDate: issueUpdatedAt,
+      message: sonarRuleMessage,
+      hash: sonarHash,
+      ...rest
+    } = issue;
+
+    return {
+      sonarKey,
+      observation,
+      startLine,
+      developerEmail,
+      issueCreatedAt,
+      language: getFirstLanguageFromFile(file),
+      file,
+      issueUpdatedAt,
+      sonarRuleMessage,
+      sonarHash,
+      ...rest,
+    };
   }
 }
