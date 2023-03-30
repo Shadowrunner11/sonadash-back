@@ -4,6 +4,7 @@ import axios, { AxiosInstance } from 'axios';
 import {
   FacetValues,
   IssuesResponse,
+  MetricResponse,
   ProjectsResponse,
   RequestPaginationsArgs,
 } from './types';
@@ -121,5 +122,31 @@ export class SonarDataSourceService {
       '/issues/search',
       requestOptions,
     );
+  }
+
+  async getMetricByProject(
+    projectKey: string,
+    metricKeys = [
+      'coverage',
+      'lines_to_cover',
+      'uncovered_lines',
+      'line_coverage',
+      'conditions_to_cover',
+      'uncovered_conditions',
+      'branch_coverage',
+    ],
+  ) {
+    const { data } = await this.client.get<MetricResponse>(
+      '/measures/component',
+      {
+        params: {
+          params: {
+            component: projectKey,
+            metricKeys: metricKeys.join(','),
+          },
+        },
+      },
+    );
+    return data.component.measures;
   }
 }

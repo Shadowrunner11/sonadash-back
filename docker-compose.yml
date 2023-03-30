@@ -12,14 +12,14 @@ services:
       - 27017:27017
     volumes:
       - ${HOME}/sonar/mongo:/data/db
-  postgres:
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_ROOT_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
-      POSTGRES_DB: sonarqube
-    ports:
-      - 5432:5432
-    volumes:
-      - ${HOME}/sonar/postgres:/var/lib/postgresql/data
+  # postgres:
+  #   image: postgres
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_ROOT_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+  #     POSTGRES_DB: sonarqube
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - ${HOME}/sonar/postgres:/var/lib/postgresql/data

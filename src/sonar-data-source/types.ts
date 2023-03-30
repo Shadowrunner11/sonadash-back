@@ -53,11 +53,24 @@ export interface IssuesResponse {
 
 export interface Component {
   key: string;
-  enabled: boolean;
+  enabled?: boolean;
   qualifier: Qualifier;
   name: string;
-  longName: string;
+  longName?: string;
   path?: string;
+  description?: string;
+}
+
+export interface ComponentWithMetric extends Component {
+  measures: Measure[];
+}
+
+export interface Measure {
+  metric: string;
+  value: number;
+}
+export interface MetricResponse {
+  component: ComponentWithMetric;
 }
 
 export enum Qualifier {

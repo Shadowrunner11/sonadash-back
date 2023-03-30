@@ -25,4 +25,29 @@ export class ProjectsMigrationService {
 
     return this.projectModel.create(parsedAllProjects);
   }
+
+  async updateMeasuresByProject(projectkey: string) {
+    const metrics = await this.sonarDataSource.getMetricByProject(projectkey);
+
+    const parseMetrics = metrics.map(({ metric, value }) => ({
+      metric,
+      value,
+    }));
+
+    this.projectModel.updateOne(
+      { sonarKey: projectkey },
+      {
+        $set: {
+          metrics: parseMetrics,
+        },
+      },
+    );
+  }
+
+  async updateAllMeasuresByProject() {
+    const projectKeys = await this.projectModel.distinct('sonarkey');
+    projectKeys.map((projectkey) => {
+      this.updateMeasuresByProject(projectkey);
+    });
+  }
 }
