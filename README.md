@@ -1,72 +1,32 @@
-# Reporting system
+# Project Title
 
-Bootstrapeado con nextjs, este monolito expone servicios de migracion de data desde una api de sonar qube a su propia base
-de datos mongoDB debido a las limitaciones que tiene la api de sonar qube respecto a la cantidad de issues que excede
-el limite impuesto por su naturaleza la usar elastic search
-
-Tambien expone un servicio de creacion de reportes y una api GRAPHQL que se alimenta del a bd de mongo
-esto para mayor disponibilidad de la data con propositos de obsevavilidad y visualziacion de datos
-
-## Bootstraping
-Para iniciar en modo desarollo
-```bash
-$ yarn start:dev
-```
-
-Si se tiene errores hay muchas causas las mas probable involucran
-- No se proveyo una conexion a una base de mongoDB
-- El puerto donde se corre la app ya esta ocupado
-
-Para estas revisar el archivo .envexample y setear las envs necesarias
-
-## Migraciones
-La env `SONAT_TOKEN` es opcional, si se quiere hacer las migraciones sin pasar autorizacion se puede setear el valor
-de otro modo las migraciones fallaran, por el momento silenciosamente.
-
-Si queremos usar las migraciones sin setear el token en las envs, pasar un token en los request 
-como username de la autorizacion, es autorizacion basica
-
-## Graphql
-Se activo el playground, solo visitar `http://localhost:<el puerto q seteaste en las envs o 3000 por defecto>/grapqhl`
-este es un playground embebido de grahphi
-
-Si se quiere usar el playground del entorno desplegado en dev no se podra, a menos q se use apollo studio pero
-no lo recomiendo por la lentitud, mejor en local
-
-## Bases de datos
-Se incluye un docker compose que tiene configuracion para las bases de datos
-esta depende de los enviroments, se recomienda setearlas desde un inicio
-
-Por el momento basta con la imagen de mongoDB, no es neceario relamente correr la de postgres
-se puede incluso trabajar con una istnacia cualquiera de mongo q se tenga corriendo, pero
-si no seconfigura los volumenes recordar q se perdera toda la informacion cuando se cierre 
-el container q tiene a mongo
-
-El archivo de docker compose tiene perssitencia sencilla, si se usa no se perdera la informacion
-
-La base de postgres servira para los logs y usuarios pero es una funcionalidad pendiente
+La aplicación web SPA de reportería es una aplicación de informes basada en la web que utiliza React, Vite, Material UI y NestJS. La aplicación obtiene datos de una API en SonarQube y muestra informes y análisis de calidad de código a los usuarios finales. La aplicación es una SPA (Single Page Application) que proporciona una experiencia de usuario rápida y sin interrupciones.
 
 ## Arquitectura
-next nos invita siempre a usar una arquitectura que permite la maxima modularuizacion, muy comptaible con la arui hexagonal ya que cada modulo tiene nsus propias funcionalidades a diferencia de otras arquitecturas donde tenemos carpetas dedicadas a cada capa como la onion
 
-Entonces si queremos encontrar algun comportamiento relaciondo por ejemplo con los issues lo encontraremos en la carpeta de issues, como sus migraciones y esquemas
-y resolvers para graphql
+La aplicación web SPA de reportería se basa en una arquitectura de tres capas que incluye una capa de presentación, una capa de servicios y una capa de datos.
 
-## Esquemas
-Para permitir maxima reutilizacion, se sigue la sugerencia de next de reutilziar los esquemas por ejemplo de mongoDb como esquemas
-de grapqhl (code first), para ello nos valemos de decoradores. Esto puede llevar a errores poco informativos si
-no se entiende bien lo q se esta realizando, tener cuidado
+## Capa de presentación
 
-## Herramientas
-Se recomienda leer la documentacion de las herramientas de terceros q se instalo cuando sea necesario
- - Problemas con fechas como formateo?
-    - Se instalo daysjs
- - Problemas con complejidad y manupulacion de arrays y objetos?
-    - Se instalo lodash
- - Exportar csv (se parece a excel, se puede leer como spreadsheet o mejor dicho hoja de calculo)?
-    - Se instalo csv- writter
- - Peticiones HTTP a otros servicios como Sonar?
-    -Se instalo axios 
+La capa de presentación es la capa de la aplicación que se encarga de la interacción con el usuario final. Esta capa utiliza componentes React, Material UI y Vite para crear una interfaz de usuario interactiva y atractiva para el usuario final. La capa de presentación incluye componentes reutilizables, hooks personalizados y componentes de diseño.
 
-Siempre revisar el package.json , la parte de "dependencies" para ver 
-si ya hay una libreria q soluciona el problema q estes presentando
+## Capa de servicios
+
+La capa de servicios es la capa de la aplicación que se encarga de comunicarse con la API de SonarQube para obtener los datos necesarios para generar los informes y análisis de calidad de código. Esta capa utiliza NestJS y proveedores de datos personalizados para realizar solicitudes HTTP a la API de SonarQube. La capa de servicios también incluye controladores para las rutas de la API y servicios personalizados para procesar y transformar los datos de la API de SonarQube.
+
+## Capa de datos
+
+La capa de datos es la capa de la aplicación que se encarga de almacenar y recuperar los datos de la aplicación. Esta capa utiliza clases de modelo y repositorios de datos personalizados para interactuar con la base de datos. La capa de datos utiliza una conexión a la base de datos para almacenar y recuperar los datos de la aplicación. La capa de datos se utiliza principalmente en la capa de servicios para interactuar con la base de datos a través de los modelos y repositorios de datos personalizados.
+
+## Estructura de archivos
+
+La aplicación web SPA de reportería utiliza la siguiente estructura de archivos en el directorio src:
+
+- assets: Contiene archivos estáticos como imágenes y fuentes.
+- components: Contiene componentes reutilizables utilizados en la capa de presentación.
+- config: Contiene archivos de configuración para la aplicación.
+- hooks: Contiene hooks personalizados utilizados en la capa de presentación.
+- layout: Contiene componentes de diseño utilizados en la capa de presentación.
+- lib: Contiene archivos relacionados con la lógica de negocio de la aplicación, incluyendo componentes y servicios relacionados con la autenticación y autorización, controladores para las rutas de API de la capa de servicios, modelos y repositorios de datos utilizados en la capa de datos, clases personalizadas de error utilizadas en la aplicación, proveedores de datos utilizados en la capa de servicios y servicios utilizados en la capa de servicios.
+- types: Contiene archivos de tipos de datos personalizados, incluyendo una función que define la forma en que se realizan solicitudes HTTP, tipos de datos para listas utilizadas en la aplicación y tipos de datos para los datos obtenidos de la API de SonarQube.
+- utils: Contiene archivos de utilidades, incluyendo archivos que definen la estructura de la aplicación y los enrutadores, la lógica principal de la

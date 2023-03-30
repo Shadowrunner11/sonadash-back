@@ -129,3 +129,54 @@ export const getPaginatedResults = async <T = unknown>(
     },
   };
 };
+
+/**
+* Process a large array of data in batches and applies a callback function to each item in the batch.
+* @param data - Array of data to be processed in batches.
+* @param cb - Callback function to be applied to each item in the batch.
+* @param limit - Batch size limit, default to 1000.
+* @returns Array of results from applying the callback function to each item in the batch.
+* @typeparam T - Type of the input data array.
+* @typeparam K - Type of the output data array.
+* @example
+* const getPokemonList = async () => {
+    const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=1000');
+    const { results: pokemonList } = response.data;
+
+    const results = await batchProcessWithCallback<Pokemon, Pokemon>(
+      pokemonList,
+      doSomethingWithEachPokemon, // do somenthing with each pokemon one by one
+      50 // Process 50 Pokemon at a time
+    );
+
+    return results;
+};
+
+ getPokemonList().then(console.log).catch(console.error);
+*/
+export const batchProccess = async <T = unknown, K = unknown>(
+  data: T[],
+  cb: (
+    item: T,
+    index: number,
+    batchIteration: number,
+    array: T[],
+  ) => Promise<K>,
+  limit = 1000,
+) => {
+  const temp = [...data];
+  const results: K[] = [];
+  let batchIteration = 0;
+
+  while (temp.length) {
+    const batch = temp.splice(0, limit);
+    const partitalResults = await Promise.all(
+      batch.map((e, i, a) => cb(e, i, batchIteration, a)),
+    );
+
+    results.push(...partitalResults);
+    batchIteration++;
+  }
+
+  return results;
+};

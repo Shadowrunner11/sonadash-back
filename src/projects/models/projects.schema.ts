@@ -1,6 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import type { HydratedDocument } from 'mongoose';
+import { CoverageMetrics } from './measures.schema';
 
 export enum Qualifier {
   Fil = 'FIL',
@@ -42,6 +43,9 @@ export class Projects {
   @Prop()
   @Field({ nullable: true })
   needIssueSync?: boolean;
+
+  @Prop()
+  coverageMetrics: CoverageMetrics;
 }
 
 export type ProjectsDocument = HydratedDocument<Projects>;
