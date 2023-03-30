@@ -140,10 +140,8 @@ export class SonarDataSourceService {
       '/measures/component',
       {
         params: {
-          params: {
-            component: projectKey,
-            metricKeys: metricKeys.join(','),
-          },
+          component: projectKey,
+          metricKeys: metricKeys.join(','),
         },
       },
     );

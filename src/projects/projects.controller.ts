@@ -1,9 +1,21 @@
-import { Controller, Patch, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Header,
+  Param,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ProjectsMigrationService } from './projects.migration.service';
+import { ProjectsService } from './projects.service';
 
 @Controller('projects')
 export class ProjectsController {
-  constructor(private migrationService: ProjectsMigrationService) {}
+  constructor(
+    private migrationService: ProjectsMigrationService,
+    private projectService: ProjectsService,
+  ) {}
 
   @Post('/migrate/all')
   migrateAll() {
@@ -12,6 +24,17 @@ export class ProjectsController {
 
   @Patch('/measures/all')
   updateMeasures() {
-    return this.migrationService.updateAllMeasuresByProject();
+    return this.migrationService.updateAllMeasures();
+  }
+
+  @Put('/measures/:projectKey')
+  updateMeausresByProjectKey(@Param('projectKey') projectKey: string) {
+    return this.migrationService.updateMeasuresByProject(projectKey);
+  }
+
+  @Get('/measures/coverage/report')
+  @Header('content-type', 'text/csv')
+  getCoverageMetricsReport() {
+    return this.projectService.getReportCoverageMetrics();
   }
 }
