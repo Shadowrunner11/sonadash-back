@@ -29,16 +29,15 @@ export class ProjectsMigrationService {
   async updateMeasuresByProject(projectkey: string) {
     const metrics = await this.sonarDataSource.getMetricByProject(projectkey);
 
-    const parseMetrics = metrics.map(({ metric, value }) => ({
-      metric,
-      value,
+    const parsedMetrics = metrics.map(({ ...metric }) => ({
+      ...metric,
     }));
 
     this.projectModel.updateOne(
       { sonarKey: projectkey },
       {
         $set: {
-          metrics: parseMetrics,
+          metrics: parsedMetrics,
         },
       },
     );

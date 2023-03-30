@@ -1,38 +1,46 @@
-import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { HydratedDocument } from 'mongoose';
-import { MeasuresMetrics } from './measuresMetrics.schema';
-
-export enum Qualifier {
-  Fil = 'FIL',
-  Trk = 'TRK',
-  Uts = 'UTS',
-}
 
 @ObjectType()
 @Schema({ timestamps: true })
-export class Measures {
+export class CoverageMetrics {
   @Prop()
   @Field()
-  key: string;
+  // coverage
+  totalCoveragePercent: number;
 
   @Prop()
   @Field()
-  name: string;
+  // lines_to_cover
+  linesToCover: number;
 
   @Prop()
   @Field()
-  description: string;
+  // uncovered_lines
+  linesNoCoverage: number;
 
   @Prop()
   @Field()
-  qualifier: Qualifier;
+  // line_coverage
+  linesConveragePercent: number;
 
   @Prop()
   @Field()
-  measuresMetrics: MeasuresMetrics;
+  // conditions_to_cover
+  qtyConditionsToCover: number;
+
+  @Prop()
+  @Field()
+  // uncovered_conditions
+  qtyConditionsWithoutCover: number;
+
+  @Prop()
+  @Field()
+  // branch_coverage
+  conditionsCoveragePercentage: number;
 }
 
-export type MeasuresDocument = HydratedDocument<Measures>;
+export type CoverageDocument = HydratedDocument<CoverageMetrics>;
 
-export const MeasuresSchema = SchemaFactory.createForClass(Measures);
+export const CoverageSchema = SchemaFactory.createForClass(CoverageMetrics);
