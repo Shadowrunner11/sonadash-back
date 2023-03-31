@@ -11,7 +11,7 @@ const coverageDictionary: Record<string, string> = {
   coverage: 'totalCoveragePercent',
   lines_to_cover: 'linesToCover',
   uncovered_lines: 'linesNoCoverage',
-  line_coverage: 'linesConveragePercent',
+  line_coverage: 'linesCoveragePercent',
   conditions_to_cover: 'qtyConditionsToCover',
   uncovered_conditions: 'qtyConditionsWithoutCover',
   branch_coverage: 'conditionsCoveragePercentage',

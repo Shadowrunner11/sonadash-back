@@ -60,8 +60,8 @@ export class ProjectsService {
     return projects.map(({ coverageMetrics, updatedAt, ...rest }) => ({
       ...coverageMetrics,
       ...rest,
-      dayUpdated: dayjs(updatedAt).tz('Etc/GMT-5').format('DD/MM/YYYY'),
-      timeUpdated: dayjs(updatedAt).tz('Etc/GMT-5').format('HH:mm:ss'),
+      dayUpdated: dayjs(updatedAt).tz('America/Lima').format('DD/MM/YYYY'),
+      timeUpdated: dayjs(updatedAt).tz('America/Lima').format('HH:mm:ss'),
       observation: 'Cobertura',
     }));
   }
@@ -72,8 +72,8 @@ export class ProjectsService {
     return projects.map(({ duplicationMetrics, updatedAt, ...rest }) => ({
       ...duplicationMetrics,
       ...rest,
-      dayUpdated: dayjs(updatedAt).tz('Etc/GMT-5').format('DD/MM/YYYY'),
-      timeUpdated: dayjs(updatedAt).tz('Etc/GMT-5').format('HH:mm:ss'),
+      dayUpdated: dayjs(updatedAt).tz('America/Lima').format('DD/MM/YYYY'),
+      timeUpdated: dayjs(updatedAt).tz('America/Lima').format('HH:mm:ss'),
       observation: 'Codigo Duplicado',
     }));
   }

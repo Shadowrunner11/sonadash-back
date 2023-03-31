@@ -23,7 +23,7 @@ export class CoverageMetrics {
   @Prop()
   @Field()
   // line_coverage
-  linesConveragePercent: number;
+  linesCoveragePercent: number;
 
   @Prop()
   @Field()
