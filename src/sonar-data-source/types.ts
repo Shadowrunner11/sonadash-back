@@ -68,7 +68,7 @@ export interface ComponentWithMetric extends Component {
 export interface Measure {
   metric: string;
   value: number;
-  bestValue: boolean;
+  bestValue?: boolean;
 }
 export interface MetricResponse {
   component: ComponentWithMetric;
