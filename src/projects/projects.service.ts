@@ -19,19 +19,30 @@ export class ProjectsService {
   async getReportCoverageMetrics() {
     const projects = await this.projectModel
       .find()
-      .select({ sonarKey: 1, name: 1, coverageMetrics: 1, qualifier: 1 })
+      .select({
+        sonarKey: 1,
+        name: 1,
+        coverageMetrics: 1,
+        qualifier: 1,
+      })
       .lean();
 
     const header = [
-      { id: 'sonarKey', title: 'key' },
-      { id: 'name', title: 'proyecto' },
+      { id: 'sonarKey', title: 'Project key' },
+      { id: 'name', title: 'Project name' },
       { id: 'observation', title: 'observacion' },
       { id: 'path', title: 'ruta' },
       { id: 'qualifier', title: 'tipo' },
-      { id: 'totalCoveragePercent', title: '%Cobertura' },
-      { id: 'linesToCover', title: 'lineas por cubrir' },
-      { id: 'linesNoCoverage', title: 'lineas sin cobertura' },
+      { id: 'totalCoveragePercent', title: '% Cobertura' },
+      { id: 'linesToCover', title: 'Lineas por cubrir' },
+      { id: 'linesNoCoverage', title: 'Lineas sin cobertura' },
       { id: 'linesCoveragePercent', title: '% Cobertura de lineas' },
+      { id: 'qtyConditionsToCover', title: 'Condiciones por cubrir' },
+      { id: 'qtyConditionsWithoutCover', title: 'Condiciones sin cobertura' },
+      {
+        id: 'conditionsCoveragePercentage',
+        title: '% Cobertura de condiciones',
+      },
     ];
 
     const parsedProjects = projects.map(({ coverageMetrics, ...rest }) => ({
