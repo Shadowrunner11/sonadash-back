@@ -33,6 +33,20 @@ export class ProjectsService {
     { id: 'timeUpdated', title: 'Hora de muestra' },
   ];
 
+  private readonly headerDuplicationMetrics = [
+    { id: 'sonarKey', title: 'Project Key' },
+    { id: 'name', title: 'Project Name' },
+    { id: 'observation', title: 'Observacion' },
+    { id: 'path', title: 'Ruta' },
+    { id: 'qualifier', title: 'Tipo' },
+    { id: 'totalDensityPercent', title: '%Densidad' },
+    { id: 'duplicatedLines', title: 'Lineas Duplicadas' },
+    { id: 'duplicatedBlocks', title: 'Bloques Duplicados' },
+    { id: 'duplicatedFiles', title: 'Archivos Duplicados' },
+    { id: 'dayUpdated', title: 'Dia de muestra' },
+    { id: 'timeUpdated', title: 'Hora de muestra' },
+  ];
+
   constructor(
     @InjectModel(sonarCollections.PROJECTS)
     private projectModel: Model<ProjectsDocument>,
@@ -48,6 +62,19 @@ export class ProjectsService {
       ...rest,
       dayUpdated: dayjs(updatedAt).tz('Etc/GMT-5').format('DD/MM/YYYY'),
       timeUpdated: dayjs(updatedAt).tz('Etc/GMT-5').format('HH:mm:ss'),
+      observation: 'Cobertura',
+    }));
+  }
+
+  private parseDuplicationByProjects(
+    projects: (Projects & { updatedAt: Date })[],
+  ) {
+    return projects.map(({ duplicationMetrics, updatedAt, ...rest }) => ({
+      ...duplicationMetrics,
+      ...rest,
+      dayUpdated: dayjs(updatedAt).tz('Etc/GMT-5').format('DD/MM/YYYY'),
+      timeUpdated: dayjs(updatedAt).tz('Etc/GMT-5').format('HH:mm:ss'),
+      observation: 'Codigo Duplicado',
     }));
   }
 
@@ -71,6 +98,31 @@ export class ProjectsService {
 
     return (
       csvWriter.getHeaderString() + csvWriter.stringifyRecords(parsedProjects)
+    );
+  }
+
+  async getReportDuplicationMetrics() {
+    const projects: (Projects & { updatedAt: Date })[] = await this.projectModel
+      .find()
+      .select({
+        sonarKey: 1,
+        name: 1,
+        duplicationMetrics: 1,
+        qualifier: 1,
+        updatedAt: 1,
+      })
+      .lean();
+
+    const parsedDuplicationByProjects =
+      this.parseDuplicationByProjects(projects);
+
+    const csvWriter = createObjectCsvStringifier({
+      header: this.headerDuplicationMetrics,
+    });
+
+    return (
+      csvWriter.getHeaderString() +
+      csvWriter.stringifyRecords(parsedDuplicationByProjects)
     );
   }
 }

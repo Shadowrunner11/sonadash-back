@@ -19,7 +19,7 @@ const coverageDictionary: Record<string, string> = {
 
 const duplicationDictionary: Record<string, string> = {
   duplicated_lines: 'duplicatedLines',
-  duplicated_lines_density: 'duplicatedLinesDensity',
+  duplicated_lines_density: 'totalDensityPercent',
   duplicated_blocks: 'duplicatedBlocks',
   duplicated_files: 'duplicatedFiles',
 };
