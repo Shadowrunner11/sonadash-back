@@ -7,14 +7,21 @@ import type { CreateProjectsDTO } from './types';
 import type { Measure } from 'src/sonar-data-source/types';
 import { batchProccess } from 'src/tools';
 
-const metricsFieldsEquilance: Record<string, string> = {
+const coverageDictionary: Record<string, string> = {
   coverage: 'totalCoveragePercent',
   lines_to_cover: 'linesToCover',
   uncovered_lines: 'linesNoCoverage',
-  line_coverage: 'linesConveragePercent',
+  line_coverage: 'linesCoveragePercent',
   conditions_to_cover: 'qtyConditionsToCover',
   uncovered_conditions: 'qtyConditionsWithoutCover',
   branch_coverage: 'conditionsCoveragePercentage',
+};
+
+const duplicationDictionary: Record<string, string> = {
+  duplicated_lines: 'duplicatedLines',
+  duplicated_lines_density: 'totalDensityPercent',
+  duplicated_blocks: 'duplicatedBlocks',
+  duplicated_files: 'duplicatedFiles',
 };
 
 @Injectable()
@@ -38,9 +45,12 @@ export class ProjectsMigrationService {
     return this.projectModel.create(parsedAllProjects);
   }
 
-  private parseMetricsfromSonar(metrics: Measure[]) {
+  private parseMetricsfromSonar(
+    metrics: Measure[],
+    metricsFieldsEquivalance: Record<string, string>,
+  ) {
     return metrics.reduce((prev: Record<string, number>, { metric, value }) => {
-      const propertyName = metricsFieldsEquilance[metric];
+      const propertyName = metricsFieldsEquivalance[metric];
 
       if (propertyName) prev[propertyName] = value;
       return prev;
@@ -50,11 +60,22 @@ export class ProjectsMigrationService {
   async updateMeasuresByProject(projectkey: string) {
     const metrics = await this.sonarDataSource.getMetricByProject(projectkey);
 
-    const parsedMetrics = this.parseMetricsfromSonar(metrics);
+    const parsedCoverageMetrics = this.parseMetricsfromSonar(
+      metrics,
+      coverageDictionary,
+    );
+
+    const parsedDuplicationMetrics = this.parseMetricsfromSonar(
+      metrics,
+      duplicationDictionary,
+    );
 
     await this.projectModel.updateOne(
       { sonarKey: projectkey },
-      { coverageMetrics: parsedMetrics },
+      {
+        coverageMetrics: parsedCoverageMetrics,
+        duplicationMetrics: parsedDuplicationMetrics,
+      },
     );
   }
 

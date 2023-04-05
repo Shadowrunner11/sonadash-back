@@ -37,4 +37,10 @@ export class ProjectsController {
   getCoverageMetricsReport() {
     return this.projectService.getReportCoverageMetrics();
   }
+
+  @Get('measures/duplication/report')
+  @Header('content-type', 'text/csv')
+  getDuplicationMetricsReport() {
+    return this.projectService.getReportDuplicationMetrics();
+  }
 }

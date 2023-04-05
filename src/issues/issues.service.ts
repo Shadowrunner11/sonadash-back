@@ -11,13 +11,29 @@ import { omit } from 'lodash';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import { getDay, getTime } from 'src/tools/date';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 @Injectable()
 export class IssuesService {
+  private readonly issuesCustomHeader = [
+    { id: 'observation', title: 'Observacion' },
+    { id: 'severity', title: 'Severidad' },
+    { id: 'language', title: 'Lenguaje' },
+    { id: 'rule', title: 'Regla' },
+    { id: 'startLine', title: 'Linea de codigo' },
+    { id: 'developerEmail', title: 'Developer' },
+    { id: 'issueCreatedAtDay', title: 'Dia de creacion' },
+    { id: 'issueCreatedAtTime', title: 'Hora de creacion' },
+    { id: 'issueUpdatedAtDay', title: 'Dia de actualizacion' },
+    { id: 'issueUpdatedAtTime', title: 'Hora de actualizacion' },
+    { id: 'file', title: 'Archivo' },
+  ];
+
   private readonly logger = new Logger(IssuesService.name);
+
   constructor(
     @InjectModel(sonarCollections.ISSUES)
     private issueModel: Model<IssueDocument>,
@@ -64,6 +80,43 @@ export class IssuesService {
     ).map((key) => ({ id: key, title: key }));
 
     const csvWriter = createObjectCsvStringifier({ header });
+
+    return (
+      csvWriter.getHeaderString() + csvWriter.stringifyRecords(parsedIssues)
+    );
+  }
+
+  private parseIssues(issues: Issue[]) {
+    return issues.map(({ issueCreatedAt, issueUpdatedAt, ...rest }) => {
+      const issueCreatedAtDay = getDay(issueCreatedAt);
+      const issueCreatedAtTime = getTime(issueCreatedAt);
+
+      const issueUpdatedAtDay = issueUpdatedAt
+        ? getDay(issueUpdatedAt)
+        : issueCreatedAtDay;
+      const issueUpdatedAtTime = issueUpdatedAt
+        ? getTime(issueUpdatedAt)
+        : issueCreatedAtTime;
+
+      return {
+        ...rest,
+        issueCreatedAtDay,
+        issueCreatedAtTime,
+        issueUpdatedAtDay,
+        issueUpdatedAtTime,
+      };
+    });
+  }
+
+  async createReportSpanish(filter?: IssuesFilter) {
+    const parsedFilter = filter ? buildFilter({ ...filter }) : {};
+    const issues = await this.issueModel.find(parsedFilter).lean();
+
+    const parsedIssues = this.parseIssues(issues);
+
+    const csvWriter = createObjectCsvStringifier({
+      header: this.issuesCustomHeader,
+    });
 
     return (
       csvWriter.getHeaderString() + csvWriter.stringifyRecords(parsedIssues)

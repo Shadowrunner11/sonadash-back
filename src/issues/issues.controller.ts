@@ -69,4 +69,10 @@ export class IssuesController {
   report(@Body() { fields, filters }: IBodyReport) {
     return this.issueService.createReport(filters, fields);
   }
+
+  @Post('/report/spanish')
+  @Header('content-type', 'text/csv')
+  reportSpanish(@Body() { filters }: IBodyReport) {
+    return this.issueService.createReportSpanish(filters);
+  }
 }

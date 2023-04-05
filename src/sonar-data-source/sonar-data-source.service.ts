@@ -134,6 +134,10 @@ export class SonarDataSourceService {
       'conditions_to_cover',
       'uncovered_conditions',
       'branch_coverage',
+      'duplicated_lines',
+      'duplicated_lines_density',
+      'duplicated_blocks',
+      'duplicated_files',
     ],
   ) {
     const { data } = await this.client.get<MetricResponse>(
