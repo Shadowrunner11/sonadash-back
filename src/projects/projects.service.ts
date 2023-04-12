@@ -3,10 +3,11 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { Projects, ProjectsDocument } from './models/projects.schema';
-import { sonarCollections } from 'src/types';
+import { PaginationParams, sonarCollections } from 'src/types';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
+import { getPaginatedResults } from 'src/tools';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -124,5 +125,9 @@ export class ProjectsService {
       csvWriter.getHeaderString() +
       csvWriter.stringifyRecords(parsedDuplicationByProjects)
     );
+  }
+
+  getPaginatedProjects(params: PaginationParams) {
+    return getPaginatedResults(this.projectModel, params);
   }
 }
