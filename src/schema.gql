@@ -63,10 +63,16 @@ type Project {
   updatedAt: DateTime!
 }
 
+type PaginatedProjects {
+  pagination: PaginationInfo!
+  data: [Project]!
+}
+
 type Query {
   issue(_id: ID!): Issue!
   paginatedIssues(page: Int!, limit: Int! = 10, filter: IssuesFilter): PaginatedIssues!
   project(_id: ID!): Project!
+  paginatedProjects(page: Int!, limit: Int! = 10): PaginatedProjects!
   paginatedAuthors(page: Int!, limit: Float! = 10): PaginatedAuthors!
 }
 
