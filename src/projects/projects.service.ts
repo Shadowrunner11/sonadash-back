@@ -142,6 +142,8 @@ export class ProjectsService {
         coverageMetrics: { $ne: null },
       })
       .select({
+        sonarKey: 1,
+        name: 1,
         coverageMetrics: 1,
       })
       .skip(skip)
