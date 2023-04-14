@@ -132,9 +132,15 @@ export class ProjectsService {
   }
 
   async getPaginatedCoverageMetrics({ page, limit = 10 }: PaginationParams) {
+    const total = await this.projectModel.count({
+      coverageMetrics: { $ne: null },
+    });
+
     const skip = (page - 1) * limit;
     const projects = await this.projectModel
-      .find()
+      .find({
+        coverageMetrics: { $ne: null },
+      })
       .select({
         coverageMetrics: 1,
       })
@@ -142,10 +148,19 @@ export class ProjectsService {
       .limit(limit)
       .lean();
     console.log(projects);
-    return projects.map(({ coverageMetrics, sonarKey, name }) => ({
+
+    const data = projects.map(({ coverageMetrics, sonarKey, name }) => ({
       ...coverageMetrics,
       sonarKey,
       name,
     }));
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+      },
+    };
   }
 }
