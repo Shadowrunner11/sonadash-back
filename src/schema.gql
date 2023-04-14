@@ -68,11 +68,30 @@ type PaginatedProjects {
   data: [Project]!
 }
 
+type Coverage {
+  totalCoveragePercent: Float
+  linesToCover: Float
+  linesNoCoverage: Float
+  linesCoveragePercent: Float
+  qtyConditionsToCover: Float
+  qtyConditionsWithoutCover: Float
+  conditionsCoveragePercentage: Float
+  _id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PaginatedCoverageMetrics {
+  pagination: PaginationInfo!
+  data: [Coverage]!
+}
+
 type Query {
   issue(_id: ID!): Issue!
   paginatedIssues(page: Int!, limit: Int! = 10, filter: IssuesFilter): PaginatedIssues!
   project(_id: ID!): Project!
   paginatedProjects(page: Int!, limit: Int! = 10): PaginatedProjects!
+  paginatedCoverageMetrics(page: Int!, limit: Int! = 10): PaginatedCoverageMetrics!
   paginatedAuthors(page: Int!, limit: Float! = 10): PaginatedAuthors!
 }
 

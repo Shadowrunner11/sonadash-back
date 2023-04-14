@@ -6,39 +6,39 @@ import { HydratedDocument } from 'mongoose';
 @Schema({ timestamps: true })
 export class CoverageMetrics {
   @Prop()
-  @Field()
+  @Field({ nullable: true })
   // coverage
-  totalCoveragePercent: number;
+  totalCoveragePercent?: number;
 
   @Prop()
-  @Field()
+  @Field({ nullable: true })
   // lines_to_cover
-  linesToCover: number;
+  linesToCover?: number;
 
   @Prop()
-  @Field()
+  @Field({ nullable: true })
   // uncovered_lines
-  linesNoCoverage: number;
+  linesNoCoverage?: number;
 
   @Prop()
-  @Field()
+  @Field({ nullable: true })
   // line_coverage
-  linesCoveragePercent: number;
+  linesCoveragePercent?: number;
 
   @Prop()
-  @Field()
+  @Field({ nullable: true })
   // conditions_to_cover
-  qtyConditionsToCover: number;
+  qtyConditionsToCover?: number;
 
   @Prop()
-  @Field()
+  @Field({ nullable: true })
   // uncovered_conditions
-  qtyConditionsWithoutCover: number;
+  qtyConditionsWithoutCover?: number;
 
   @Prop()
-  @Field()
+  @Field({ nullable: true })
   // branch_coverage
-  conditionsCoveragePercentage: number;
+  conditionsCoveragePercentage?: number;
 }
 
 export type CoverageDocument = HydratedDocument<CoverageMetrics>;
