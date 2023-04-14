@@ -17,7 +17,7 @@ export enum Visibility {
 @ObjectType()
 @Schema({ timestamps: true })
 export class Projects {
-  @Prop()
+  @Prop({ unique: true })
   @Field()
   sonarKey: string;
 

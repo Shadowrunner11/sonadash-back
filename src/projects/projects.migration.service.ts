@@ -6,6 +6,7 @@ import { ProjectsDocument } from './models/projects.schema';
 import type { CreateProjectsDTO } from './types';
 import type { Measure } from 'src/sonar-data-source/types';
 import { batchProccess } from 'src/tools';
+import dayjs from 'dayjs';
 
 const coverageDictionary: Record<string, string> = {
   coverage: 'totalCoveragePercent',
@@ -35,7 +36,23 @@ export class ProjectsMigrationService {
   async migrateAllProjects() {
     const allProjects = await this.sonarDataSource.getAllProjects();
 
-    const parsedAllProjects: CreateProjectsDTO[] = allProjects.map(
+    const alreadyMigratedProjects = await this.projectModel.distinct(
+      'sonarKey',
+    );
+
+    const alreadyMigratedProjectsBy = alreadyMigratedProjects.reduce(
+      (acum, sonarKey) => {
+        acum[sonarKey] = true;
+        return acum;
+      },
+      {},
+    );
+
+    const projectsToMigrate = allProjects.filter(
+      ({ key }) => alreadyMigratedProjectsBy[key],
+    );
+
+    const parsedAllProjects: CreateProjectsDTO[] = projectsToMigrate.map(
       ({ key, ...rest }) => ({
         ...rest,
         sonarKey: key,
@@ -57,8 +74,8 @@ export class ProjectsMigrationService {
     }, {});
   }
 
-  async updateMeasuresByProject(projectkey: string) {
-    const metrics = await this.sonarDataSource.getMetricByProject(projectkey);
+  private async getParsedProjectMesaures(projectKey: string) {
+    const metrics = await this.sonarDataSource.getMetricByProject(projectKey);
 
     const parsedCoverageMetrics = this.parseMetricsfromSonar(
       metrics,
@@ -70,6 +87,16 @@ export class ProjectsMigrationService {
       duplicationDictionary,
     );
 
+    return {
+      parsedCoverageMetrics,
+      parsedDuplicationMetrics,
+    };
+  }
+
+  async updateMeasuresByProject(projectkey: string) {
+    const { parsedCoverageMetrics, parsedDuplicationMetrics } =
+      await this.getParsedProjectMesaures(projectkey);
+
     await this.projectModel.updateOne(
       { sonarKey: projectkey },
       {
@@ -79,13 +106,64 @@ export class ProjectsMigrationService {
     );
   }
 
-  async updateAllMeasures() {
+  private async updateMeasurePipeline(projectKey: string) {
+    const { parsedCoverageMetrics, parsedDuplicationMetrics } =
+      await this.getParsedProjectMesaures(projectKey);
+
+    return {
+      updateOne: {
+        filter: {
+          sonarKey: projectKey,
+        },
+        update: {
+          $set: {
+            coverageMetrics: parsedCoverageMetrics,
+            duplicationMetrics: parsedDuplicationMetrics,
+          },
+        },
+      },
+    };
+  }
+
+  private async bulkUpdateMeasures(projectKeys: string[]) {
+    const bulkPipeline = await Promise.all(
+      projectKeys.map((projectKey) => this.updateMeasurePipeline(projectKey)),
+    );
+
+    return await this.projectModel.bulkWrite(bulkPipeline);
+  }
+
+  private async writeMeasures(projectKeys: string[], limit: number) {
+    const results = [];
+    while (projectKeys.length) {
+      const partialProjectKeys = projectKeys.splice(0, limit);
+
+      const partialResult = await this.bulkUpdateMeasures(partialProjectKeys);
+
+      results.push(partialResult);
+    }
+
+    return results;
+  }
+
+  async migrateAllMeasures(limit = 20) {
     const projectKeys = await this.projectModel.distinct('sonarKey');
 
-    return batchProccess(
-      projectKeys,
-      (projectkey) => this.updateMeasuresByProject(projectkey),
-      10,
-    );
+    return await this.writeMeasures(projectKeys, limit);
+  }
+
+  async updateNewMeasures(limit = 20) {
+    const oldDataFilter = { $lte: dayjs().subtract(1, 'week').toDate() };
+
+    const projectKeys = await this.projectModel.distinct('sonarKey', {
+      $or: [
+        { 'coverageMetrics.updatedAt': oldDataFilter },
+        { coverageMetrics: null },
+        { 'duplicationMetrics.updatedAt': oldDataFilter },
+        { duplicationMetrics: null },
+      ],
+    });
+
+    return await this.writeMeasures(projectKeys, limit);
   }
 }

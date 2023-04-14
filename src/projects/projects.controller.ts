@@ -24,7 +24,12 @@ export class ProjectsController {
 
   @Patch('/measures/all')
   updateMeasures() {
-    return this.migrationService.updateAllMeasures();
+    return this.migrationService.migrateAllMeasures();
+  }
+
+  @Patch('/measures/new')
+  updateNewMeasures() {
+    return this.migrationService.updateNewMeasures();
   }
 
   @Put('/measures/:projectKey')
