@@ -12,6 +12,12 @@ export class Coverage extends CoverageMetrics {
 
   @Field()
   updatedAt: Date;
+
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field({ nullable: true })
+  sonarKey: string;
 }
 
 @ObjectType()

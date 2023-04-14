@@ -79,6 +79,8 @@ type Coverage {
   _id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  name: String
+  sonarKey: String
 }
 
 type PaginatedCoverageMetrics {
