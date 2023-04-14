@@ -2,6 +2,7 @@ import { Resolver, Query, Args, ID, Int } from '@nestjs/graphql';
 import { PaginatedProjects, Project } from './models/project.graphql';
 import { ProjectsService } from './projects.service';
 import { PaginatedCoverageMetrics } from './models/coverage.graphql';
+import { PaginatedDuplicatedMetrics } from './models/duplicated.graphql';
 
 @Resolver(() => Project)
 export class ProjectsResolver {
@@ -29,6 +30,17 @@ export class ProjectsResolver {
     @Args({ name: 'limit', defaultValue: 10, type: () => Int }) limit?: number,
   ) {
     return this.projectsService.getPaginatedCoverageMetrics({
+      page,
+      limit,
+    });
+  }
+
+  @Query(() => PaginatedDuplicatedMetrics)
+  paginatedDuplicatedMetrics(
+    @Args('page', { type: () => Int }) page: number,
+    @Args({ name: 'limit', defaultValue: 10, type: () => Int }) limit?: number,
+  ) {
+    return this.projectsService.getPaginatedDuplicatedMetrics({
       page,
       limit,
     });

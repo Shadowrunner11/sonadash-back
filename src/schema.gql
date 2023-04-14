@@ -88,12 +88,30 @@ type PaginatedCoverageMetrics {
   data: [Coverage]!
 }
 
+type Duplication {
+  totalDensityPercent: Float!
+  duplicatedLines: Float!
+  duplicatedBlocks: Float!
+  duplicatedFiles: Float!
+  _id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String
+  sonarKey: String
+}
+
+type PaginatedDuplicatedMetrics {
+  pagination: PaginationInfo!
+  data: [Duplication]!
+}
+
 type Query {
   issue(_id: ID!): Issue!
   paginatedIssues(page: Int!, limit: Int! = 10, filter: IssuesFilter): PaginatedIssues!
   project(_id: ID!): Project!
   paginatedProjects(page: Int!, limit: Int! = 10): PaginatedProjects!
   paginatedCoverageMetrics(page: Int!, limit: Int! = 10): PaginatedCoverageMetrics!
+  paginatedDuplicatedMetrics(page: Int!, limit: Int! = 10): PaginatedDuplicatedMetrics!
   paginatedAuthors(page: Int!, limit: Float! = 10): PaginatedAuthors!
 }
 

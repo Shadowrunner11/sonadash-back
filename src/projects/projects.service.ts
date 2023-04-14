@@ -165,4 +165,39 @@ export class ProjectsService {
       },
     };
   }
+
+  async getPaginatedDuplicatedMetrics({ page, limit = 10 }: PaginationParams) {
+    const total = await this.projectModel.count({
+      duplicationMetrics: { $ne: null },
+    });
+
+    const skip = (page - 1) * limit;
+    const projects = await this.projectModel
+      .find({
+        duplicationMetrics: { $ne: null },
+      })
+      .select({
+        sonarKey: 1,
+        name: 1,
+        duplicationMetrics: 1,
+      })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    console.log(projects);
+
+    const data = projects.map(({ duplicationMetrics, sonarKey, name }) => ({
+      ...duplicationMetrics,
+      sonarKey,
+      name,
+    }));
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+      },
+    };
+  }
 }
