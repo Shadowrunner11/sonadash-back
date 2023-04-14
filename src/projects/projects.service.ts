@@ -130,4 +130,22 @@ export class ProjectsService {
   getPaginatedProjects(params: PaginationParams) {
     return getPaginatedResults(this.projectModel, params);
   }
+
+  async getPaginatedCoverageMetrics({ page, limit = 10 }: PaginationParams) {
+    const skip = (page - 1) * limit;
+    const projects = await this.projectModel
+      .find()
+      .select({
+        coverageMetrics: 1,
+      })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    console.log(projects);
+    return projects.map(({ coverageMetrics, sonarKey, name }) => ({
+      ...coverageMetrics,
+      sonarKey,
+      name,
+    }));
+  }
 }
