@@ -1,8 +1,13 @@
-import { Resolver, Query, Args, Int } from '@nestjs/graphql';
-import { Author, PaginatedAuthors } from './models/author.grapqhl';
+import { Resolver, Query, Args, Int, Mutation } from '@nestjs/graphql';
+import {
+  AuthorGraphql,
+  AuthorUpsertRespose as AuthorUpsertResponse,
+  AuthorsInput,
+  PaginatedAuthors,
+} from './models/author.grapqhl';
 import { AuthorService } from './author.service';
 
-@Resolver(() => Author)
+@Resolver(() => AuthorGraphql)
 export class AuthorsResolver {
   constructor(private authorsService: AuthorService) {}
 
@@ -15,5 +20,16 @@ export class AuthorsResolver {
       page,
       limit,
     });
+  }
+
+  @Mutation(() => AuthorUpsertResponse)
+  async upsertAuthor(
+    @Args('input', { type: () => AuthorsInput }) { authors }: AuthorsInput,
+  ) {
+    await this.authorsService.bulkUpsertAuthors(authors);
+
+    return {
+      success: true,
+    };
   }
 }

@@ -149,7 +149,6 @@ export class ProjectsService {
       .skip(skip)
       .limit(limit)
       .lean();
-    console.log(projects);
 
     const data = projects.map(({ coverageMetrics, sonarKey, name }) => ({
       ...coverageMetrics,
