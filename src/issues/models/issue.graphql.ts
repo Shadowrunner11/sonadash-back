@@ -5,7 +5,10 @@ import {
   FilterItemsString,
   WithPagination,
 } from 'src/tools/graphql/entitites/pagination.graphql';
-import { TimeFilter, TimeStampsFilter } from 'src/author/models/author.grapqhl';
+import {
+  TimeFilter,
+  TimeStampsFilter,
+} from 'src/tools/graphql/entitites/filters';
 
 @ObjectType()
 export class Issue extends Issues {

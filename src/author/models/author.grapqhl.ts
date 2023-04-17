@@ -1,7 +1,11 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
-import { WithPagination } from 'src/tools/graphql/entitites/pagination.graphql';
+import {
+  FilterItemsString,
+  WithPagination,
+} from 'src/tools/graphql/entitites/pagination.graphql';
 import { Author } from './author.schema';
 import { CreateAuthorsDTO } from '../types';
+import { CommonFilters } from 'src/tools/graphql/entitites/filters';
 
 @ObjectType()
 export class AuthorGraphql extends Author {
@@ -73,4 +77,10 @@ export class AuthorsInput {
 export class AuthorUpsertRespose {
   @Field()
   success?: boolean;
+}
+
+@InputType()
+export class AuthorsFilters extends CommonFilters {
+  @Field(() => FilterItemsString, { nullable: true })
+  email: FilterItemsString;
 }

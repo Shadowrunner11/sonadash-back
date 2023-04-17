@@ -2,6 +2,7 @@ import { Resolver, Query, Args, Int, Mutation } from '@nestjs/graphql';
 import {
   AuthorGraphql,
   AuthorUpsertRespose as AuthorUpsertResponse,
+  AuthorsFilters,
   AuthorsInput,
   PaginatedAuthors,
 } from './models/author.grapqhl';
@@ -15,11 +16,16 @@ export class AuthorsResolver {
   async paginatedAuthors(
     @Args('page', { type: () => Int }) page: number,
     @Args({ name: 'limit', defaultValue: 10 }) limit?: number,
+    @Args('filter', { type: () => AuthorsFilters, nullable: true })
+    filter?: AuthorsFilters,
   ) {
-    return this.authorsService.getPaginatedAuthors({
-      page,
-      limit,
-    });
+    return this.authorsService.getPaginatedAuthors(
+      {
+        page,
+        limit,
+      },
+      filter,
+    );
   }
 
   @Mutation(() => AuthorUpsertResponse)
