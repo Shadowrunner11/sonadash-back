@@ -1,19 +1,18 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { WithPagination } from 'src/tools/graphql/entitites/pagination.graphql';
+import { Author } from './author.schema';
+import { CreateAuthorsDTO } from '../types';
 
 @ObjectType()
-export class Author {
+export class AuthorGraphql extends Author {
   @Field(() => ID)
   _id: string;
-
-  @Field()
-  email: string;
 }
 
 @ObjectType()
 export class PaginatedAuthors extends WithPagination {
-  @Field(() => [Author])
-  data: Author[];
+  @Field(() => [AuthorGraphql])
+  data: AuthorGraphql[];
 }
 
 @InputType()
@@ -32,4 +31,46 @@ export class TimeStampsFilter {
 
   @Field({ nullable: true })
   updatedAtFilter: TimeFilter;
+}
+
+@InputType()
+export class AuthorInput implements CreateAuthorsDTO {
+  @Field()
+  email: string;
+
+  @Field({ nullable: true })
+  firstname?: string;
+
+  @Field({ nullable: true })
+  lastname?: string;
+
+  @Field({ nullable: true })
+  squad?: string;
+
+  @Field({ nullable: true })
+  tribe?: string;
+
+  @Field({ nullable: true })
+  chapter?: string;
+
+  @Field({ nullable: true })
+  provider?: string;
+
+  @Field({ nullable: true })
+  role?: string;
+
+  @Field({ nullable: true })
+  status?: string;
+}
+
+@InputType()
+export class AuthorsInput {
+  @Field(() => [AuthorInput])
+  authors: AuthorInput[];
+}
+
+@ObjectType()
+export class AuthorUpsertRespose {
+  @Field()
+  success?: boolean;
 }

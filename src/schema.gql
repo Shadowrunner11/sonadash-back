@@ -8,14 +8,26 @@ type PaginationInfo {
   hasNext: Boolean
 }
 
-type Author {
-  _id: ID!
+type AuthorGraphql {
   email: String!
+  firstname: String
+  lastname: String
+  squad: String
+  tribe: String
+  chapter: String
+  provider: String
+  role: String
+  status: String
+  _id: ID!
 }
 
 type PaginatedAuthors {
   pagination: PaginationInfo!
-  data: [Author!]!
+  data: [AuthorGraphql!]!
+}
+
+type AuthorUpsertRespose {
+  success: Boolean!
 }
 
 type Issue {
@@ -144,4 +156,24 @@ input FilterItemsString {
 input FilterItemString {
   isExclusion: Boolean
   value: String!
+}
+
+type Mutation {
+  upsertAuthor(input: AuthorsInput!): AuthorUpsertRespose!
+}
+
+input AuthorsInput {
+  authors: [AuthorInput!]!
+}
+
+input AuthorInput {
+  email: String!
+  firstname: String
+  lastname: String
+  squad: String
+  tribe: String
+  chapter: String
+  provider: String
+  role: String
+  status: String
 }
