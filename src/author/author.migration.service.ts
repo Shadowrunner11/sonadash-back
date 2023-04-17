@@ -41,10 +41,6 @@ export class AuthorMigrationService {
     await this.authorModel.create(filteredAuthors);
   }
 
-  private throwIfLimitSurpassed(length: number) {
-    if (length > 100) throw new Error('Facet limit surpassed');
-  }
-
   async migrateAllAuthor(batchSize = 10) {
     // eslint-disable-next-line no-console
     console.time('migration time');
@@ -81,8 +77,6 @@ export class AuthorMigrationService {
       ) as PromiseFulfilledResult<Value[]>[];
 
       const authors = authorsFullfiled.flatMap(({ value }) => value);
-
-      this.throwIfLimitSurpassed(authors.length);
 
       await this.createAuthors(authors);
 
