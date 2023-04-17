@@ -8,28 +8,6 @@ type PaginationInfo {
   hasNext: Boolean
 }
 
-type AuthorGraphql {
-  email: String!
-  firstname: String
-  lastname: String
-  squad: String
-  tribe: String
-  chapter: String
-  provider: String
-  role: String
-  status: String
-  _id: ID!
-}
-
-type PaginatedAuthors {
-  pagination: PaginationInfo!
-  data: [AuthorGraphql!]!
-}
-
-type AuthorUpsertRespose {
-  success: Boolean!
-}
-
 type Issue {
   sonarKey: String!
   observation: String!
@@ -117,6 +95,28 @@ type PaginatedDuplicatedMetrics {
   data: [Duplication]!
 }
 
+type AuthorGraphql {
+  email: String!
+  firstname: String
+  lastname: String
+  squad: String
+  tribe: String
+  chapter: String
+  provider: String
+  role: String
+  status: String
+  _id: ID!
+}
+
+type PaginatedAuthors {
+  pagination: PaginationInfo!
+  data: [AuthorGraphql!]!
+}
+
+type AuthorUpsertRespose {
+  success: Boolean!
+}
+
 type Query {
   issue(_id: ID!): Issue!
   paginatedIssues(page: Int!, limit: Int! = 10, filter: IssuesFilter): PaginatedIssues!
@@ -124,7 +124,7 @@ type Query {
   paginatedProjects(page: Int!, limit: Int! = 10): PaginatedProjects!
   paginatedCoverageMetrics(page: Int!, limit: Int! = 10): PaginatedCoverageMetrics!
   paginatedDuplicatedMetrics(page: Int!, limit: Int! = 10): PaginatedDuplicatedMetrics!
-  paginatedAuthors(page: Int!, limit: Float! = 10): PaginatedAuthors!
+  paginatedAuthors(page: Int!, limit: Float! = 10, filter: AuthorsFilters): PaginatedAuthors!
 }
 
 input IssuesFilter {
@@ -156,6 +156,13 @@ input FilterItemsString {
 input FilterItemString {
   isExclusion: Boolean
   value: String!
+}
+
+input AuthorsFilters {
+  createdAtFilter: TimeFilter
+  updatedAtFilter: TimeFilter
+  _ids: FilterItemsString
+  email: FilterItemsString
 }
 
 type Mutation {

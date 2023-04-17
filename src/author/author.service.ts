@@ -5,6 +5,7 @@ import { AuthorDocument } from './models/author.schema';
 import { PaginationParams, sonarCollections } from 'src/types';
 import { getPaginatedResults } from 'src/tools';
 import { CreateAuthorsDTO } from './types';
+import { AuthorsFilters } from './models/author.grapqhl';
 
 @Injectable()
 export class AuthorService {
@@ -13,8 +14,8 @@ export class AuthorService {
     private readonly authorsModel: Model<AuthorDocument>,
   ) {}
 
-  getPaginatedAuthors(params: PaginationParams) {
-    return getPaginatedResults(this.authorsModel, params);
+  getPaginatedAuthors(params: PaginationParams, filter?: AuthorsFilters) {
+    return getPaginatedResults(this.authorsModel, params, { ...filter });
   }
 
   async bulkUpsertAuthors(data: CreateAuthorsDTO[]) {
