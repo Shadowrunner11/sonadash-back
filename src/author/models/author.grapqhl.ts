@@ -29,20 +29,6 @@ export class TimeFilter {
 }
 
 @InputType()
-export class TimeStampsFilter {
-  @Field({ nullable: true })
-  createdAtFilter: TimeFilter;
-
-  @Field({ nullable: true })
-  updatedAtFilter: TimeFilter;
-}
-
-@InputType()
-export class CommonFilters extends TimeStampsFilter {
-  @Field(() => FilterItemsString, { nullable: true })
-  _ids?: FilterItemsString;
-}
-@InputType()
 export class AuthorInput implements CreateAuthorsDTO {
   @Field()
   email: string;
