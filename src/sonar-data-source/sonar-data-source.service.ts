@@ -59,19 +59,27 @@ export class SonarDataSourceService {
     return facets.find(({ property }) => property === facetValue)?.values;
   }
 
-  getSingleFacetsByProject(
+  async getSingleFacetsByProject(
     faceValue: FacetValues,
     projectKey: string,
     requestOptions?: RequestPaginationsArgs,
   ) {
     const { auth, paginationParams } = requestOptions ?? {};
-    return this.getSingleFacets(faceValue, {
+    const data = await this.getSingleFacets(faceValue, {
       auth,
       paginationParams: {
         ...paginationParams,
         componentKeys: projectKey,
       },
     });
+
+    this.throwIfLimitSurpassed(data?.length ?? 0);
+
+    return data ?? [];
+  }
+
+  private throwIfLimitSurpassed(length: number) {
+    if (length > 100) throw new Error('Facet limit surpassed');
   }
 
   getPaginatedProject(requestOptions?: RequestPaginationsArgs) {

@@ -1,5 +1,8 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
-import { WithPagination } from 'src/tools/graphql/entitites/pagination.graphql';
+import {
+  FilterItemsString,
+  WithPagination,
+} from 'src/tools/graphql/entitites/pagination.graphql';
 import { Author } from './author.schema';
 import { CreateAuthorsDTO } from '../types';
 
@@ -33,6 +36,11 @@ export class TimeStampsFilter {
   updatedAtFilter: TimeFilter;
 }
 
+@InputType()
+export class CommonFilters extends TimeStampsFilter {
+  @Field(() => FilterItemsString, { nullable: true })
+  _ids?: FilterItemsString;
+}
 @InputType()
 export class AuthorInput implements CreateAuthorsDTO {
   @Field()
