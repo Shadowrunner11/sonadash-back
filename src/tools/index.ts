@@ -39,8 +39,15 @@ export const getCredentialsFromBasicAuth = (base64AuthValue: string) =>
       { username: '', password: '' },
     );
 
-export const buildItemFilter = ({ value, isExclusion }: FilterItemString) =>
-  isExclusion ? { $ne: value } : value;
+export const buildItemFilter = ({
+  value,
+  isExclusion,
+  isPartialMatch,
+}: FilterItemString) => {
+  const searchValue = isPartialMatch ? new RegExp(value, 'ig') : value;
+
+  return isExclusion ? { $ne: value } : searchValue;
+};
 
 export const buildListItemsFilter = ({
   values,
@@ -106,17 +113,17 @@ export const buildFilter = (filter: IFilters) =>
   );
 
 // TODO: aggrergar middleware de validacion antes q consuma request a la base de datos
+const loggerPaginatedResults = new Logger();
 
 export const getPaginatedResults = async <T = unknown>(
   model: Model<T>,
   { page, limit = 10 }: PaginationParams,
   filter?: IFilters,
 ) => {
-  const logger = new Logger();
   const skip = (page - 1) * limit;
-  logger.debug(filter);
+  loggerPaginatedResults.debug(filter);
   const parsedFilter = filter ? buildFilter(filter) : {};
-  logger.debug(parsedFilter);
+  loggerPaginatedResults.debug(parsedFilter);
   const total = await model.count(parsedFilter);
 
   const data = await model.find(parsedFilter).skip(skip).limit(limit).lean();

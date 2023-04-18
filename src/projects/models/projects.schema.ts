@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import type { HydratedDocument } from 'mongoose';
+import type { HydratedDocument, ObjectId } from 'mongoose';
 import { CoverageMetrics } from './measures.schema';
 import { DuplicationMetrics } from './duplications.schema';
 
@@ -21,13 +21,37 @@ export class Projects {
   @Field()
   sonarKey: string;
 
-  @Prop()
+  @Prop({ unique: true })
   @Field()
-  name: string;
+  appName: string;
+
+  @Prop()
+  @Field(() => [String], { nullable: 'itemsAndList' })
+  relatedProjects?: ObjectId[];
 
   @Prop()
   @Field()
-  qualifier: Qualifier;
+  tribe?: string;
+
+  @Prop()
+  @Field()
+  squad?: string;
+
+  @Prop()
+  @Field()
+  qualiteProfile?: string;
+
+  @Prop()
+  @Field()
+  qualiteGate?: string;
+
+  @Prop()
+  @Field()
+  name?: string;
+
+  @Prop()
+  @Field()
+  qualifier?: Qualifier;
 
   @Prop()
   @Field({ nullable: true })
@@ -35,7 +59,7 @@ export class Projects {
 
   @Prop()
   @Field(() => [String], { nullable: 'items' })
-  tags: string[];
+  tags?: string[];
 
   @Prop()
   @Field()

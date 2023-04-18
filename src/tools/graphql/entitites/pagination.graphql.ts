@@ -19,7 +19,6 @@ export class WithPagination {
 }
 
 // TODO: check if there is need to put read only
-
 @InputType()
 export class BaseFilterI {
   @Field({ nullable: true })
@@ -30,6 +29,9 @@ export class BaseFilterI {
 export class FilterItemString extends BaseFilterI {
   @Field()
   value: string;
+
+  @Field({ defaultValue: false })
+  isPartialMatch?: boolean;
 }
 
 @InputType()
