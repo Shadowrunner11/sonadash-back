@@ -1,6 +1,6 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import {
-  FilterItemsString,
+  FilterItemString,
   WithPagination,
 } from 'src/tools/graphql/entitites/pagination.graphql';
 import { Author } from './author.schema';
@@ -72,6 +72,6 @@ export class AuthorUpsertRespose {
 
 @InputType()
 export class AuthorsFilters extends CommonFilters {
-  @Field(() => FilterItemsString, { nullable: true })
-  email: FilterItemsString;
+  @Field(() => FilterItemString, { nullable: true })
+  email: FilterItemString;
 }

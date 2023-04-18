@@ -42,6 +42,12 @@ type PaginatedIssues {
 
 type Project {
   sonarKey: String!
+  appName: String!
+  relatedProjects: [String]
+  tribe: String!
+  squad: String!
+  qualiteProfile: String!
+  qualiteGate: String!
   name: String!
   qualifier: String!
   isFavorite: Boolean
@@ -156,13 +162,14 @@ input FilterItemsString {
 input FilterItemString {
   isExclusion: Boolean
   value: String!
+  isPartialMatch: Boolean! = false
 }
 
 input AuthorsFilters {
   createdAtFilter: TimeFilter
   updatedAtFilter: TimeFilter
   _ids: FilterItemsString
-  email: FilterItemsString
+  email: FilterItemString
 }
 
 type Mutation {
