@@ -5,7 +5,6 @@ import { SonarDataSourceService } from 'src/sonar-data-source/sonar-data-source.
 import { ProjectsDocument } from './models/projects.schema';
 import type { CreateProjectsDTO } from './types';
 import type { Measure } from 'src/sonar-data-source/types';
-import { batchProccess } from 'src/tools';
 import dayjs from 'dayjs';
 
 const coverageDictionary: Record<string, string> = {
@@ -36,9 +35,9 @@ export class ProjectsMigrationService {
   async migrateAllProjects() {
     const allProjects = await this.sonarDataSource.getAllProjects();
 
-    const alreadyMigratedProjects = await this.projectModel.distinct(
-      'sonarKey',
-    );
+    const alreadyMigratedProjects = await this.projectModel
+      .distinct('sonarKey')
+      .exec();
 
     const alreadyMigratedProjectsBy = alreadyMigratedProjects.reduce(
       (acum, sonarKey) => {
@@ -97,13 +96,15 @@ export class ProjectsMigrationService {
     const { parsedCoverageMetrics, parsedDuplicationMetrics } =
       await this.getParsedProjectMesaures(projectkey);
 
-    await this.projectModel.updateOne(
-      { sonarKey: projectkey },
-      {
-        coverageMetrics: parsedCoverageMetrics,
-        duplicationMetrics: parsedDuplicationMetrics,
-      },
-    );
+    await this.projectModel
+      .updateOne(
+        { sonarKey: projectkey },
+        {
+          coverageMetrics: parsedCoverageMetrics,
+          duplicationMetrics: parsedDuplicationMetrics,
+        },
+      )
+      .exec();
   }
 
   private async updateMeasurePipeline(projectKey: string) {
@@ -147,7 +148,7 @@ export class ProjectsMigrationService {
   }
 
   async migrateAllMeasures(limit = 20) {
-    const projectKeys = await this.projectModel.distinct('sonarKey');
+    const projectKeys = await this.projectModel.distinct('sonarKey').exec();
 
     return await this.writeMeasures(projectKeys, limit);
   }
@@ -155,14 +156,16 @@ export class ProjectsMigrationService {
   async updateNewMeasures(limit = 20) {
     const oldDataFilter = { $lte: dayjs().subtract(1, 'week').toDate() };
 
-    const projectKeys = await this.projectModel.distinct('sonarKey', {
-      $or: [
-        { 'coverageMetrics.updatedAt': oldDataFilter },
-        { coverageMetrics: null },
-        { 'duplicationMetrics.updatedAt': oldDataFilter },
-        { duplicationMetrics: null },
-      ],
-    });
+    const projectKeys = await this.projectModel
+      .distinct('sonarKey', {
+        $or: [
+          { 'coverageMetrics.updatedAt': oldDataFilter },
+          { coverageMetrics: null },
+          { 'duplicationMetrics.updatedAt': oldDataFilter },
+          { duplicationMetrics: null },
+        ],
+      })
+      .exec();
 
     return await this.writeMeasures(projectKeys, limit);
   }
