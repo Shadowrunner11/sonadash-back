@@ -291,3 +291,24 @@ export interface RulesResponse {
   ps: number;
   rules: Rule[];
 }
+
+export interface Language {
+  key: string;
+  name: string;
+}
+
+export interface LanguagesResponse {
+  languages: Language[];
+}
+
+export interface QualityProfile {
+  key: string;
+  name: string;
+  language: string;
+  languageName: string;
+  isDefault: boolean;
+}
+
+export interface QualityProfilesResponse {
+  profiles: QualityProfile[];
+}

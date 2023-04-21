@@ -2,7 +2,12 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { keyBy, pick } from 'lodash';
 import { SonarDataSourceService } from 'src/sonar-data-source/sonar-data-source.service';
 import { SupabaseService } from 'src/supabase/supabase.service';
-import { RulesCreateDTO, RulesStatusCreateDTO } from 'src/supabase/types';
+import {
+  LanguageCreateDTO,
+  QualityProfileCreateDTO,
+  RulesCreateDTO,
+  RulesStatusCreateDTO,
+} from 'src/supabase/types';
 
 @Injectable()
 export class RulesService {
@@ -204,5 +209,37 @@ export class RulesService {
     ]);
 
     return results;
+  }
+
+  async migrateLanguages() {
+    const { languages } = await this.sonarDataService.getLanguages({});
+    const parsedLanguage: LanguageCreateDTO[] = languages.map(
+      ({ key, name }) => ({ alias: name, name: key }),
+    );
+
+    return await this.supabaseService.createBulkByTable(
+      'languages',
+      parsedLanguage,
+    );
+  }
+
+  async migrateQualityProfiles() {
+    const { profiles } = await this.sonarDataService.getQualityProfiles({});
+    const language = await this.supabaseService.getAllLanguages();
+    const languagesByName = keyBy(language, 'name');
+    const parsedProfiles: QualityProfileCreateDTO[] = profiles.map(
+      ({ key, name, language, isDefault }) => ({
+        isDefault,
+        key,
+        name,
+        updatedAt: new Date(),
+        language_id: languagesByName[language]?.id,
+      }),
+    );
+
+    return await this.supabaseService.createBulkByTable(
+      'qualityprofiles',
+      parsedProfiles,
+    );
   }
 }
