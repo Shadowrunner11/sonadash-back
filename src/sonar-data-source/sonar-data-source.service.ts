@@ -7,6 +7,8 @@ import {
   MetricResponse,
   ProjectsResponse,
   RequestPaginationsArgs,
+  RequestRulesPaginationParams,
+  RulesResponse,
 } from './types';
 
 const defaultSonarAPI_URL = 'https://sonarqube.innovacionpacifico.com/api';
@@ -125,8 +127,8 @@ export class SonarDataSourceService {
     );
   }
 
-  getPaginatedIssues(requestOptions?: RequestPaginationsArgs) {
-    return this.getPaginatedData<IssuesResponse>(
+  async getPaginatedIssues(requestOptions?: RequestPaginationsArgs) {
+    return await this.getPaginatedData<IssuesResponse>(
       '/issues/search',
       requestOptions,
     );
@@ -158,5 +160,26 @@ export class SonarDataSourceService {
       },
     );
     return data.component.measures;
+  }
+
+  async getRules({
+    auth,
+    paginationParams,
+  }: RequestPaginationsArgs<RequestRulesPaginationParams>) {
+    const { data } = await this.client.get<RulesResponse>('/rules/search', {
+      params: paginationParams,
+      auth,
+    });
+
+    return data;
+  }
+
+  async getChangelog({ auth, paginationParams }: RequestPaginationsArgs) {
+    const { data } = await this.client.get('/changelog', {
+      auth,
+      params: paginationParams,
+    });
+
+    return data;
   }
 }

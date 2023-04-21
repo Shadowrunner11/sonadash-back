@@ -30,6 +30,7 @@
     "@nestjs/mongoose": "^9.2.2",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/swagger": "^6.2.1",
+    "@supabase/supabase-js": "^2.21.0",
     "axios": "^1.3.4",
     "better-queue": "^3.8.12",
     "csv-writer": "^1.6.0",

@@ -30,7 +30,8 @@ export class AuthorMigrationService {
 
     const alreadyPushed = await this.authorModel
       .find({ email: { $in: emails } })
-      .lean();
+      .lean()
+      .exec();
 
     const alreadyPushedBy = keyBy(alreadyPushed, 'email');
 
@@ -50,7 +51,8 @@ export class AuthorMigrationService {
         createdAt: 'asc',
       })
       .select({ sonarKey: 1 })
-      .lean();
+      .lean()
+      .exec();
 
     const { length: initialLength } = projects;
 
