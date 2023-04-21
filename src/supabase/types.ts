@@ -25,7 +25,9 @@ export interface RulesStatusCreateDTO {
 export interface QualityProfileCreateDTO {
   key: string;
   name: string;
+  language_id: string;
   updatedAt: Date;
+  isDefault: boolean;
 }
 
 export interface QualityProfileDTO extends QualityProfileCreateDTO {
@@ -46,7 +48,7 @@ export interface BasicRuleInfo {
   name: string;
 }
 
-export interface RulesStatus extends RulesCreateDTO {
+export interface RulesStatus extends RulesStatusCreateDTO {
   id: string;
   createdAt: Date;
 }
@@ -68,6 +70,11 @@ export interface Database {
         Row: LanguageDTO;
         Insert: LanguageCreateDTO;
         Update: LanguageCreateDTO;
+      };
+      qualityprofiles: {
+        Row: QualityProfileDTO;
+        Insert: QualityProfileCreateDTO;
+        Update: QualityProfileCreateDTO;
       };
     };
   };

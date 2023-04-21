@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
 import type {
   Database,
+  LanguageCreateDTO,
   LanguageDTO,
+  QualityProfileCreateDTO,
   QualityProfileDTO,
   RulesCreateDTO,
   RulesStatusCreateDTO,
@@ -27,10 +29,17 @@ export class SupabaseService {
   }
 
   async createDataByTable(
-    table: 'rules' | 'status',
-    dataDTOs: (RulesCreateDTO | RulesStatusCreateDTO)[],
+    tableName: 'rules' | 'status' | 'languages' | 'qualityprofiles',
+    dataDTOs: (
+      | RulesCreateDTO
+      | RulesStatusCreateDTO
+      | LanguageCreateDTO
+      | QualityProfileCreateDTO
+    )[],
   ) {
-    const { status, error } = await this.client.from(table).insert(dataDTOs);
+    const { status, error } = await this.client
+      .from(tableName)
+      .insert(dataDTOs);
 
     if (error) throw error;
 
@@ -48,8 +57,13 @@ export class SupabaseService {
   }
 
   async createBulkByTable(
-    tableName: 'rules' | 'status',
-    data: (RulesCreateDTO | RulesStatusCreateDTO)[],
+    tableName: 'rules' | 'status' | 'languages' | 'qualityprofiles',
+    data: (
+      | RulesCreateDTO
+      | RulesStatusCreateDTO
+      | LanguageCreateDTO
+      | QualityProfileCreateDTO
+    )[],
     limitSize = 100,
   ) {
     const dataCopy = [...data];

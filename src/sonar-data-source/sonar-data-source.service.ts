@@ -4,8 +4,10 @@ import axios, { AxiosInstance } from 'axios';
 import {
   FacetValues,
   IssuesResponse,
+  LanguagesResponse,
   MetricResponse,
   ProjectsResponse,
+  QualityProfilesResponse,
   RequestPaginationsArgs,
   RequestRulesPaginationParams,
   RulesResponse,
@@ -179,6 +181,30 @@ export class SonarDataSourceService {
       auth,
       params: paginationParams,
     });
+
+    return data;
+  }
+
+  async getLanguages({ auth, paginationParams }: RequestPaginationsArgs) {
+    const { data } = await this.client.get<LanguagesResponse>(
+      '/languages/list',
+      {
+        auth,
+        params: paginationParams,
+      },
+    );
+
+    return data;
+  }
+
+  async getQualityProfiles({ auth, paginationParams }: RequestPaginationsArgs) {
+    const { data } = await this.client.get<QualityProfilesResponse>(
+      '/qualityprofiles/search',
+      {
+        auth,
+        params: paginationParams,
+      },
+    );
 
     return data;
   }
