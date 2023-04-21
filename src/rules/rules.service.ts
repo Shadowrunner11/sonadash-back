@@ -104,11 +104,26 @@ export class RulesService {
 
     const rulesByKey = keyBy(rulesInSupaBase, 'key');
 
+    const { id } =
+      (await this.supabaseService.getLanguageByName(language)) ?? {};
+
+    if (!id) throw new Error('there is not language id');
+
     const rulesToCreate: RulesCreateDTO[] = rules
       .filter(({ key }) => !rulesByKey[key])
-      .map((rawData) =>
-        pick(rawData, ['key', 'lang', 'name', 'htmlDesc', 'severity', 'type']),
-      );
+      .map((rawData) => {
+        const result = pick(rawData, [
+          'key',
+          'name',
+          'htmlDesc',
+          'severity',
+          'type',
+        ]);
+        return {
+          ...result,
+          lang_id: id,
+        };
+      });
 
     this.logger.log(`Rules to create ${rulesToCreate.length}`);
 
@@ -129,12 +144,19 @@ export class RulesService {
 
     const activeRulesByKey = keyBy(activeRules, 'key');
 
+    const { id: qualityProfile_id } =
+      (await this.supabaseService.getQualityProfileByKey(qualityProfileKey)) ??
+      {};
+
+    if (!qualityProfile_id) throw new Error("id doesn't exist");
+
     const parsedRulesStatus: RulesStatusCreateDTO[] =
       rulesFromSupaBase?.map(({ key, id }) => ({
-        qualityProfileKey,
+        qualityProfile_id,
         rule_id: id,
         isActiveSonar: Boolean(activeRulesByKey[key]),
         isActivate: Boolean(activeRulesByKey[key]),
+        updatedAt: new Date(),
       })) ?? [];
 
     return await this.supabaseService.createBulkByTable(
