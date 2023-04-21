@@ -1,7 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
-import type { Database, RulesCreateDTO, RulesStatusCreateDTO } from './types';
+import type {
+  Database,
+  LanguageDTO,
+  QualityProfileDTO,
+  RulesCreateDTO,
+  RulesStatusCreateDTO,
+} from './types';
 
 @Injectable()
 export class SupabaseService {
@@ -114,5 +120,35 @@ export class SupabaseService {
       .throwOnError();
 
     return data;
+  }
+
+  async getLanguageByName(name: string) {
+    const { data } = await this.client
+      .from('language')
+      .select()
+      .limit(1)
+      .eq('name', name)
+      .single()
+      .throwOnError();
+
+    return data as LanguageDTO | null;
+  }
+
+  async getAllLanguages() {
+    const { data } = await this.client.from('language').select().throwOnError();
+
+    return data as LanguageDTO[] | null;
+  }
+
+  async getQualityProfileByKey(key: string) {
+    const { data } = await this.client
+      .from('qualityProfile')
+      .select()
+      .limit(1)
+      .eq('key', key)
+      .single()
+      .throwOnError();
+
+    return data as QualityProfileDTO | null;
   }
 }
