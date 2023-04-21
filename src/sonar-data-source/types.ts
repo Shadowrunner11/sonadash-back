@@ -157,14 +157,6 @@ export enum Scope {
   Test = 'TEST',
 }
 
-export enum Severity {
-  Blocker = 'BLOCKER',
-  Critical = 'CRITICAL',
-  Info = 'INFO',
-  Major = 'MAJOR',
-  Minor = 'MINOR',
-}
-
 export enum Status {
   Open = 'OPEN',
 }
@@ -194,6 +186,7 @@ export enum Tag {
 export enum Type {
   Bug = 'BUG',
   CodeSmell = 'CODE_SMELL',
+  SecurityHotspot = 'SECURITY_HOTSPOT',
   Vulnerability = 'VULNERABILITY',
 }
 
@@ -203,10 +196,13 @@ export interface Paging {
   total: number;
 }
 
-export interface PaginationParams {
+export interface BasicPaginationParams {
   p?: number;
   ps?: number;
   s?: string;
+}
+
+export interface PaginationParams extends BasicPaginationParams {
   asc?: boolean;
   facets?: string;
   componentKeys?: string;
@@ -219,7 +215,79 @@ export enum truthyPaginationParam {
   TRUE = 'true',
 }
 
-export interface RequestPaginationsArgs {
-  paginationParams?: PaginationParams;
+export interface RequestPaginationsArgs<T = PaginationParams> {
+  paginationParams?: T;
   auth?: AxiosBasicCredentials;
+}
+
+export interface RequestRulesPaginationParams extends BasicPaginationParams {
+  activation?: string;
+  qprofile?: string;
+  languages?: string;
+}
+
+export enum RemFnType {
+  ConstantIssue = 'CONSTANT_ISSUE',
+  Linear = 'LINEAR',
+  LinearOffset = 'LINEAR_OFFSET',
+}
+
+export interface Rule {
+  key: string;
+  repo: string;
+  name: string;
+  createdAt: string;
+  htmlDesc: string;
+  mdDesc: string;
+  severity: Severity;
+  status: Status;
+  isTemplate: boolean;
+  tags: any[];
+  sysTags: string[];
+  lang: string;
+  langName: string;
+  params: any[];
+  defaultDebtRemFnType?: RemFnType;
+  defaultDebtRemFnOffset?: string;
+  debtOverloaded: boolean;
+  debtRemFnType?: RemFnType;
+  debtRemFnOffset?: string;
+  type: Type;
+  defaultRemFnType?: RemFnType;
+  defaultRemFnBaseEffort?: string;
+  remFnType?: RemFnType;
+  remFnBaseEffort?: string;
+  remFnOverloaded: boolean;
+  scope: Scope;
+  isExternal: boolean;
+  deprecatedKeys?: DeprecatedKeys;
+  defaultDebtRemFnCoeff?: string;
+  effortToFixDescription?: string;
+  debtRemFnCoeff?: string;
+  defaultRemFnGapMultiplier?: string;
+  remFnGapMultiplier?: string;
+  gapDescription?: string;
+}
+
+export interface DeprecatedKeys {
+  deprecatedKey: string[];
+}
+
+export enum Severity {
+  Blocker = 'BLOCKER',
+  Critical = 'CRITICAL',
+  Info = 'INFO',
+  Major = 'MAJOR',
+  Minor = 'MINOR',
+}
+
+export enum RuleStatus {
+  Ready = 'READY',
+}
+
+export interface RulesResponse {
+  total: number;
+  p: number;
+  ps: number;
+  rules: Rule[];
 }

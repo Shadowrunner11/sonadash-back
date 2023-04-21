@@ -11,6 +11,8 @@ import { AuthorModule } from './author/author.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
+import { SupabaseModule } from './supabase/supabase.module';
+import { RulesModule } from './rules/rules.module';
 
 enum envProps {
   MONGO_URI = 'MONGODB_URI',
@@ -38,6 +40,8 @@ enum envProps {
     SonarDataSourceModule,
     AuthorModule,
     QueueModule,
+    SupabaseModule,
+    RulesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

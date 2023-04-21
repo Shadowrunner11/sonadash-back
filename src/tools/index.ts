@@ -124,9 +124,14 @@ export const getPaginatedResults = async <T = unknown>(
   loggerPaginatedResults.debug(filter);
   const parsedFilter = filter ? buildFilter(filter) : {};
   loggerPaginatedResults.debug(parsedFilter);
-  const total = await model.count(parsedFilter);
+  const total = await model.count(parsedFilter).exec();
 
-  const data = await model.find(parsedFilter).skip(skip).limit(limit).lean();
+  const data = await model
+    .find(parsedFilter)
+    .skip(skip)
+    .limit(limit)
+    .lean()
+    .exec();
 
   return {
     data,

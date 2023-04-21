@@ -132,9 +132,11 @@ export class ProjectsService {
   }
 
   async getPaginatedCoverageMetrics({ page, limit = 10 }: PaginationParams) {
-    const total = await this.projectModel.count({
-      coverageMetrics: { $ne: null },
-    });
+    const total = await this.projectModel
+      .count({
+        coverageMetrics: { $ne: null },
+      })
+      .exec();
 
     const skip = (page - 1) * limit;
     const projects = await this.projectModel
@@ -148,7 +150,8 @@ export class ProjectsService {
       })
       .skip(skip)
       .limit(limit)
-      .lean();
+      .lean()
+      .exec();
 
     const data = projects.map(({ coverageMetrics, sonarKey, name }) => ({
       ...coverageMetrics,
@@ -166,11 +169,14 @@ export class ProjectsService {
   }
 
   async getPaginatedDuplicatedMetrics({ page, limit = 10 }: PaginationParams) {
-    const total = await this.projectModel.count({
-      duplicationMetrics: { $ne: null },
-    });
+    const total = await this.projectModel
+      .count({
+        duplicationMetrics: { $ne: null },
+      })
+      .exec();
 
     const skip = (page - 1) * limit;
+
     const projects = await this.projectModel
       .find({
         duplicationMetrics: { $ne: null },
@@ -182,8 +188,8 @@ export class ProjectsService {
       })
       .skip(skip)
       .limit(limit)
-      .lean();
-    console.log(projects);
+      .lean()
+      .exec();
 
     const data = projects.map(({ duplicationMetrics, sonarKey, name }) => ({
       ...duplicationMetrics,
