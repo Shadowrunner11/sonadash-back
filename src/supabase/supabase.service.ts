@@ -34,7 +34,7 @@ export class SupabaseService {
   async getAllRulesByLanguage(language: string) {
     const { data } = await this.client
       .from('rules')
-      .select('key')
+      .select('id, key')
       .eq('lang', language)
       .throwOnError();
 
@@ -68,7 +68,14 @@ export class SupabaseService {
   async getRulesStatusesByQualityProfile(qualityProfileKey: string) {
     const { data } = await this.client
       .from('status')
-      .select('id, sonarKey')
+      // eslint-disable-next-line prettier/prettier
+      .select(`
+        id,
+        rule_id(
+          key
+        )
+      `,
+      )
       .eq('qualityProfileKey', qualityProfileKey)
       .throwOnError();
 
@@ -78,12 +85,12 @@ export class SupabaseService {
   async updateRulesStatusesIsActiveSonar(
     qualityProfileKey: string,
     isActiveSonarNewValue: boolean,
-    ruleKeys: string[],
+    ruleIds: string[],
   ) {
     const { data } = await this.client
       .from('status')
       .update({ isActiveSonar: isActiveSonarNewValue })
-      .in('ruleKey', ruleKeys)
+      .in('rule_id', ruleIds)
       .eq('qualityProfileKey', qualityProfileKey)
       .eq('isActiveSonar', !isActiveSonarNewValue)
       .select()
@@ -95,12 +102,12 @@ export class SupabaseService {
   async updateRulesStatusesIsActiveSonarByExclusion(
     qualityProfileKey: string,
     isActiveSonarNewValue: boolean,
-    ruleKeys: string[],
+    ruleIds: string[],
   ) {
     const { data } = await this.client
       .from('status')
       .update({ isActiveSonar: isActiveSonarNewValue })
-      .not('ruleKey', 'in', ruleKeys)
+      .not('rule_id', 'in', ruleIds)
       .eq('qualityProfileKey', qualityProfileKey)
       .eq('isActiveSonar', !isActiveSonarNewValue)
       .select()

@@ -17,7 +17,7 @@ export interface RulesStatusCreateDTO {
   isActiveSonar: boolean;
   qualityProfileKey: string;
   qualityProfileName?: string;
-  ruleKey: string;
+  rule_id: string;
   lastActualization?: Date;
 }
 

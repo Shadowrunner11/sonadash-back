@@ -130,9 +130,9 @@ export class RulesService {
     const activeRulesByKey = keyBy(activeRules, 'key');
 
     const parsedRulesStatus: RulesStatusCreateDTO[] =
-      rulesFromSupaBase?.map(({ key }) => ({
+      rulesFromSupaBase?.map(({ key, id }) => ({
         qualityProfileKey,
-        ruleKey: key,
+        rule_id: id,
         isActiveSonar: Boolean(activeRulesByKey[key]),
         isActivate: Boolean(activeRulesByKey[key]),
       })) ?? [];
@@ -154,18 +154,30 @@ export class RulesService {
         },
       });
 
+    const [{ lang }] = deactivatedRules;
+
+    const rulesFromSupaBase = await this.supabaseService.getAllRulesByLanguage(
+      lang,
+    );
+
+    const rulesFromSupaBaseBy = keyBy(rulesFromSupaBase, 'key');
+
     if (total > 500) throw new Error('Needs a batch process');
+
+    const deactivatedRulesIds = deactivatedRules.map(
+      ({ key }) => rulesFromSupaBaseBy[key].id,
+    );
 
     const results = await Promise.all([
       this.supabaseService.updateRulesStatusesIsActiveSonar(
         qualityProfile,
         false,
-        deactivatedRules.map(({ key }) => key),
+        deactivatedRulesIds,
       ),
       this.supabaseService.updateRulesStatusesIsActiveSonarByExclusion(
         qualityProfile,
         true,
-        deactivatedRules.map(({ key }) => key),
+        deactivatedRulesIds,
       ),
     ]);
 
