@@ -101,18 +101,17 @@ export class RulesService {
 
     this.logger.log(`Rules ${rules.length}`);
 
-    const rulesInSupaBase = await this.supabaseService.getAllRulesByLanguage(
-      language,
-    );
-
-    this.logger.log(`Rules in supabase ${rulesInSupaBase}`);
-
-    const rulesByKey = keyBy(rulesInSupaBase, 'key');
-
     const { id } =
       (await this.supabaseService.getLanguageByName(language)) ?? {};
 
     if (!id) throw new Error('there is not language id');
+
+    const rulesInSupaBase =
+      (await this.supabaseService.getAllRulesByLanguageId(id)) ?? [];
+
+    this.logger.log(`Rules in supabase ${rulesInSupaBase}`);
+
+    const rulesByKey = keyBy(rulesInSupaBase, 'key');
 
     const rulesToCreate: RulesCreateDTO[] = rules
       .filter(({ key }) => !rulesByKey[key])
@@ -139,9 +138,14 @@ export class RulesService {
     qualityProfileKey: string,
     language: string,
   ) {
-    const rulesFromSupaBase = await this.supabaseService.getAllRulesByLanguage(
-      language,
-    );
+    const { id: language_id } =
+      (await this.supabaseService.getLanguageByName(language)) ?? {};
+
+    if (!language_id) throw new Error('Not found languge');
+
+    const rulesFromSupaBase =
+      await this.supabaseService.getAllRulesByLanguageId(language_id);
+
     const activeRules = await this.getRules({
       qprofile: qualityProfileKey,
       activation: 'yes',
@@ -160,8 +164,8 @@ export class RulesService {
         qualityProfile_id,
         rule_id: id,
         isActiveSonar: Boolean(activeRulesByKey[key]),
-        isActivate: Boolean(activeRulesByKey[key]),
-        updatedAt: new Date(),
+        isActive: Boolean(activeRulesByKey[key]),
+        updated_at: new Date(),
       })) ?? [];
 
     return await this.supabaseService.createBulkByTable(
@@ -183,9 +187,8 @@ export class RulesService {
 
     const [{ lang }] = deactivatedRules;
 
-    const rulesFromSupaBase = await this.supabaseService.getAllRulesByLanguage(
-      lang,
-    );
+    const rulesFromSupaBase =
+      await this.supabaseService.getAllRulesByLanguageId(lang);
 
     const rulesFromSupaBaseBy = keyBy(rulesFromSupaBase, 'key');
 
@@ -226,13 +229,15 @@ export class RulesService {
   async migrateQualityProfiles() {
     const { profiles } = await this.sonarDataService.getQualityProfiles({});
     const language = await this.supabaseService.getAllLanguages();
+
     const languagesByName = keyBy(language, 'name');
+
     const parsedProfiles: QualityProfileCreateDTO[] = profiles.map(
       ({ key, name, language, isDefault }) => ({
         isDefault,
         key,
         name,
-        updatedAt: new Date(),
+        updated_at: new Date(),
         language_id: languagesByName[language]?.id,
       }),
     );
