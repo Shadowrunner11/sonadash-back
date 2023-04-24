@@ -46,11 +46,11 @@ export class SupabaseService {
     return status;
   }
 
-  async getAllRulesByLanguage(language: string) {
+  async getAllRulesByLanguageId(language_id: string) {
     const { data } = await this.client
       .from('rules')
       .select('id, key')
-      .eq('lang', language)
+      .eq('lang_id', Number(language_id))
       .throwOnError();
 
     return data;
@@ -136,27 +136,31 @@ export class SupabaseService {
     return data;
   }
 
+  //TODO: table names should be in enum
   async getLanguageByName(name: string) {
     const { data } = await this.client
-      .from('language')
+      .from('languages')
       .select()
       .limit(1)
       .eq('name', name)
-      .single()
+      .maybeSingle()
       .throwOnError();
 
     return data as LanguageDTO | null;
   }
 
   async getAllLanguages() {
-    const { data } = await this.client.from('language').select().throwOnError();
+    const { data } = await this.client
+      .from('languages')
+      .select()
+      .throwOnError();
 
     return data as LanguageDTO[] | null;
   }
 
   async getQualityProfileByKey(key: string) {
     const { data } = await this.client
-      .from('qualityProfile')
+      .from('qualityprofiles')
       .select()
       .limit(1)
       .eq('key', key)

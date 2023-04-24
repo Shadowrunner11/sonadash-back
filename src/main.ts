@@ -18,6 +18,7 @@ async function bootstrap() {
     .addTag('sonar qube')
     .addTag('reporting')
     .addTag('auth', 'needs auth')
+    .addTag('subpabase')
     .build();
 
   app.enableCors();

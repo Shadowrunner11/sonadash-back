@@ -14,25 +14,25 @@ export interface RuleDTO extends RulesCreateDTO {
 }
 
 export interface RulesStatusCreateDTO {
-  isActivate: boolean;
+  isActive: boolean;
   isActiveSonar: boolean;
   qualityProfile_id: string;
   rule_id: string;
-  lastActualization?: Date;
-  updatedAt: Date;
+  lastActualizationSonar?: Date;
+  updated_at: Date;
 }
 
 export interface QualityProfileCreateDTO {
   key: string;
   name: string;
   language_id: string;
-  updatedAt: Date;
+  updated_at: Date;
   isDefault: boolean;
 }
 
 export interface QualityProfileDTO extends QualityProfileCreateDTO {
   id: string;
-  createdAt: Date;
+  created_at: Date;
 }
 
 export interface LanguageCreateDTO {
@@ -50,7 +50,7 @@ export interface BasicRuleInfo {
 
 export interface RulesStatus extends RulesStatusCreateDTO {
   id: string;
-  createdAt: Date;
+  created_at: Date;
 }
 
 export interface Database {
