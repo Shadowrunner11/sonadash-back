@@ -134,6 +134,7 @@ export class RulesService {
     return await this.supabaseService.createBulkByTable('rules', rulesToCreate);
   }
 
+  //TODO: refactor to decoupled form language
   async migrateStatusByQualityProfile(
     qualityProfileKey: string,
     language: string,
