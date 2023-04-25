@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { keyBy, pick } from 'lodash';
 import { SonarDataSourceService } from 'src/sonar-data-source/sonar-data-source.service';
+import { MigrateData } from 'src/sonar-data-source/types';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import {
   LanguageCreateDTO,
@@ -173,6 +174,17 @@ export class RulesService {
       'status',
       parsedRulesStatus,
     );
+  }
+
+  async bulkMigrateStatusByQProfile(data: MigrateData[], limit = 10) {
+    while (data.length) {
+      const slicedData = data.splice(0, limit);
+      await Promise.all(
+        slicedData.map(({ language, qualityProfileKey }) =>
+          this.migrateStatusByQualityProfile(qualityProfileKey, language),
+        ),
+      );
+    }
   }
 
   async updateDeactivatedRules(qualityProfile: string) {

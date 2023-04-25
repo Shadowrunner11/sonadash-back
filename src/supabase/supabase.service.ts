@@ -18,7 +18,7 @@ export class SupabaseService {
 
   constructor(private configService: ConfigService) {
     const supaBaseURI = this.configService.get<string>(
-      'SUPBA_BASE_CLIENT',
+      'SUPA_BASE_CLIENT',
       'https://xyzcompany.supabase.co',
     );
 
