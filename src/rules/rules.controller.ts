@@ -1,6 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { RulesService } from './rules.service';
 import { ApiTags } from '@nestjs/swagger';
+import { MigrateData } from 'src/sonar-data-source/types';
 
 interface MigrateOptions {
   languages?: string;
@@ -25,6 +26,18 @@ export class RulesController {
       throw new Error('Language and qprofile is required');
 
     return this.rulesService.migrateStatusByQualityProfile(qprofile, languages);
+  }
+
+  @Post('/migrate/data')
+  migrateStatusByProfile(@Body() { data }: { data: MigrateData[] }) {
+    if (
+      !data?.every(
+        ({ language, qualityProfileKey }) => language && qualityProfileKey,
+      )
+    )
+      throw new Error('is required correct format');
+
+    return this.rulesService.bulkMigrateStatusByQProfile(data);
   }
 
   @Post('/migrate/languages')

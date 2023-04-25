@@ -312,3 +312,8 @@ export interface QualityProfile {
 export interface QualityProfilesResponse {
   profiles: QualityProfile[];
 }
+
+export interface MigrateData {
+  qualityProfileKey: string;
+  language: string;
+}
