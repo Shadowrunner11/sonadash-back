@@ -148,6 +148,9 @@ export class RulesService {
     const rulesFromSupaBase =
       await this.supabaseService.getAllRulesByLanguageId(language_id);
 
+    if (!rulesFromSupaBase?.length)
+      throw new Error('there are not rules in db, migrate them first');
+
     const activeRules = await this.getRules({
       qprofile: qualityProfileKey,
       activation: 'yes',
@@ -177,14 +180,19 @@ export class RulesService {
   }
 
   async bulkMigrateStatusByQProfile(data: MigrateData[], limit = 10) {
+    const results = [];
     while (data.length) {
       const slicedData = data.splice(0, limit);
-      await Promise.all(
+      const partialResults = await Promise.all(
         slicedData.map(({ language, qualityProfileKey }) =>
           this.migrateStatusByQualityProfile(qualityProfileKey, language),
         ),
       );
+
+      results.push(...partialResults.flat());
     }
+
+    return results;
   }
 
   async updateDeactivatedRules(qualityProfile: string) {
