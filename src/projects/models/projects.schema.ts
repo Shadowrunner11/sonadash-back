@@ -21,9 +21,9 @@ export class Projects {
   @Field()
   sonarKey: string;
 
-  @Prop({ unique: true })
+  @Prop({ unique: true, sparse: true })
   @Field()
-  appName: string;
+  appName?: string;
 
   @Prop()
   @Field(() => [String], { nullable: 'itemsAndList' })

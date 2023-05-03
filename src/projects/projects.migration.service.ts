@@ -48,7 +48,7 @@ export class ProjectsMigrationService {
     );
 
     const projectsToMigrate = allProjects.filter(
-      ({ key }) => alreadyMigratedProjectsBy[key],
+      ({ key }) => !alreadyMigratedProjectsBy[key],
     );
 
     const parsedAllProjects: CreateProjectsDTO[] = projectsToMigrate.map(
@@ -58,7 +58,7 @@ export class ProjectsMigrationService {
       }),
     );
 
-    return this.projectModel.create(parsedAllProjects);
+    return await this.projectModel.create(parsedAllProjects);
   }
 
   private parseMetricsfromSonar(
