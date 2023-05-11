@@ -25,6 +25,7 @@ type Issue {
   sonarRuleMessage: String
   file: String!
   project: String!
+  commitDate: DateTime
   _id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -54,6 +55,7 @@ type Project {
   tags: [String]!
   visibility: String!
   needIssueSync: Boolean
+  analysisDate: DateTime
   _id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!

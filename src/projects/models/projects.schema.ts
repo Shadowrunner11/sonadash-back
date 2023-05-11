@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import type { HydratedDocument, ObjectId } from 'mongoose';
 import { CoverageMetrics } from './measures.schema';
 import { DuplicationMetrics } from './duplications.schema';
+import { SizeMetrics } from './size.schema';
 
 export enum Qualifier {
   Fil = 'FIL',
@@ -70,10 +71,17 @@ export class Projects {
   needIssueSync?: boolean;
 
   @Prop()
+  @Field({ nullable: true })
+  analysisDate?: Date;
+
+  @Prop()
   coverageMetrics: CoverageMetrics;
 
   @Prop()
   duplicationMetrics: DuplicationMetrics;
+
+  @Prop()
+  sizeMetrics: SizeMetrics;
 }
 
 export type ProjectsDocument = HydratedDocument<Projects>;

@@ -208,6 +208,7 @@ export interface PaginationParams extends BasicPaginationParams {
   componentKeys?: string;
   createdInLast?: string;
   createdAfter?: string;
+  f?: string;
 }
 
 export enum truthyPaginationParam {
@@ -218,6 +219,10 @@ export enum truthyPaginationParam {
 export interface RequestPaginationsArgs<T = PaginationParams> {
   paginationParams?: T;
   auth?: AxiosBasicCredentials;
+}
+
+export interface IssuesPaginationParams extends PaginationParams {
+  issues?: string;
 }
 
 export interface RequestRulesPaginationParams extends BasicPaginationParams {
@@ -316,4 +321,25 @@ export interface QualityProfilesResponse {
 export interface MigrateData {
   qualityProfileKey: string;
   language: string;
+}
+
+export interface IssueSnippet {
+  component: Component;
+  sources: Source[];
+}
+
+export interface Measures {
+  lines: string;
+  coverage: string;
+  issues: string;
+}
+
+export interface Source {
+  line: number;
+  code: string;
+  scmRevision: string;
+  scmAuthor: string;
+  scmDate: string;
+  duplicated: boolean;
+  isNew: boolean;
 }

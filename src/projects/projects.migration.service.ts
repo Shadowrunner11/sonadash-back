@@ -24,6 +24,11 @@ const duplicationDictionary: Record<string, string> = {
   duplicated_files: 'duplicatedFiles',
 };
 
+const sizeDictionary = {
+  ncloc: 'linesOfCode',
+  lines: 'totalLines',
+};
+
 @Injectable()
 export class ProjectsMigrationService {
   constructor(
@@ -34,6 +39,8 @@ export class ProjectsMigrationService {
 
   async migrateAllProjects() {
     const allProjects = await this.sonarDataSource.getAllProjects();
+
+    console.log(allProjects[0]);
 
     const alreadyMigratedProjects = await this.projectModel
       .distinct('sonarKey')
@@ -86,9 +93,15 @@ export class ProjectsMigrationService {
       duplicationDictionary,
     );
 
+    const parsedSizeMetrics = this.parseMetricsfromSonar(
+      metrics,
+      sizeDictionary,
+    );
+
     return {
       parsedCoverageMetrics,
       parsedDuplicationMetrics,
+      parsedSizeMetrics,
     };
   }
 
@@ -108,8 +121,11 @@ export class ProjectsMigrationService {
   }
 
   private async updateMeasurePipeline(projectKey: string) {
-    const { parsedCoverageMetrics, parsedDuplicationMetrics } =
-      await this.getParsedProjectMesaures(projectKey);
+    const {
+      parsedCoverageMetrics,
+      parsedDuplicationMetrics,
+      parsedSizeMetrics,
+    } = await this.getParsedProjectMesaures(projectKey);
 
     return {
       updateOne: {
@@ -120,6 +136,7 @@ export class ProjectsMigrationService {
           $set: {
             coverageMetrics: parsedCoverageMetrics,
             duplicationMetrics: parsedDuplicationMetrics,
+            sizeMetrics: parsedSizeMetrics,
           },
         },
       },

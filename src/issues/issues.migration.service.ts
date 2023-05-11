@@ -10,9 +10,14 @@ import {
   RequestPaginationsArgs,
 } from 'src/sonar-data-source/types';
 import { AxiosBasicCredentials } from 'axios';
-import { formatISOWithTUTCDate, getFirstLanguageFromFile } from 'src/tools';
+import {
+  debouncedPromise,
+  formatISOWithTUTCDate,
+  getFirstLanguageFromFile,
+} from 'src/tools';
 import { sonarCollections } from 'src/types';
 import { keyBy } from 'lodash';
+import { RESPONSE_PASSTHROUGH_METADATA } from '@nestjs/common/constants';
 
 interface TimePeriodArgs {
   days?: number;
@@ -175,7 +180,7 @@ export class IssuesMigrationService {
 
     const emptyArray = Array.from(Array(maxPageLimit));
 
-    return Promise.all(
+    return await Promise.all(
       emptyArray.map((_, index) =>
         this.migrateIssues({
           auth,
@@ -220,5 +225,95 @@ export class IssuesMigrationService {
       sonarHash,
       ...rest,
     };
+  }
+
+  private async getCommitInfo(issueKey: string, startLine: number) {
+    const response = await this.sonarDataSource.getCommitInfoByIssueKey(
+      issueKey,
+    );
+
+    const [commitData] = Object.values(response) ?? [];
+
+    const rawDate = commitData?.sources?.find(
+      ({ line }) => startLine === line,
+    )?.scmDate;
+
+    return {
+      issueKey,
+      date: rawDate ? new Date(rawDate) : undefined,
+    };
+  }
+
+  async getCommitInfoByIssueKey(limit = 120) {
+    const total = await this.issueModel
+      .find({ commitDate: null, startLine: { $ne: 0 } })
+      .count()
+      .exec();
+
+    const iterations = Math.round(total / limit);
+
+    for (let cursor = 0; cursor < iterations; cursor++) {
+      await debouncedPromise(async () => {
+        const issues = await this.issueModel
+          .find({ commitDate: null, startLine: { $ne: 0 } })
+          .limit(limit)
+          .select({
+            sonarKey: 1,
+            startLine: 1,
+          })
+          .lean()
+          .exec();
+
+        const partialResults = await Promise.all(
+          issues.map(({ startLine, sonarKey }) =>
+            this.getCommitInfo(sonarKey, startLine),
+          ),
+        );
+
+        const writeInfo = await this.issueModel.bulkWrite(
+          partialResults
+            .filter(({ date }) => Boolean(date))
+            .map(({ date, issueKey }) => ({
+              updateOne: {
+                filter: { sonarKey: issueKey },
+                update: { commitDate: date },
+              },
+            })),
+        );
+
+        return writeInfo;
+      });
+    }
+  }
+
+  async repareStartLine() {
+    const issueKeys = await this.issueModel
+      .distinct('sonarKey', { startLine: { $in: [0, null] } })
+      .exec();
+
+    while (issueKeys.length) {
+      const partialSubKeys = issueKeys.splice(0, 500);
+      const { issues: sonarIssues } =
+        await this.sonarDataSource.getPaginatedIssues({
+          paginationParams: {
+            p: 1,
+            ps: 500,
+            issues: partialSubKeys.join(','),
+          },
+        });
+
+      await this.issueModel.bulkWrite(
+        sonarIssues.map(({ textRange, key }) => ({
+          updateOne: {
+            filter: { sonarKey: key },
+            update: {
+              startLine: !textRange
+                ? null
+                : Number(textRange?.startLine) || Number(textRange?.endLine),
+            },
+          },
+        })),
+      );
+    }
   }
 }

@@ -192,3 +192,13 @@ export const batchProccess = async <T = unknown, K = unknown>(
 
   return results;
 };
+
+export const debouncedPromise = <T = any>(cb: () => Promise<T>) => {
+  return new Promise((res) => {
+    setTimeout(async () => {
+      const response = await cb();
+      console.log('ending debounce');
+      res(response);
+    }, 3000);
+  });
+};

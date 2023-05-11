@@ -4,7 +4,9 @@ import {
   Header,
   Headers,
   Logger,
+  Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { IssuesMigrationService } from './issues.migration.service';
 import { ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
@@ -74,5 +76,15 @@ export class IssuesController {
   @Header('content-type', 'text/csv')
   reportSpanish(@Body() { filters }: IBodyReport) {
     return this.issueService.createReportSpanish(filters);
+  }
+
+  @Put('/commitDate')
+  async updateCommitDate() {
+    return await this.migrationService.getCommitInfoByIssueKey();
+  }
+
+  @Patch('/repareStartLine')
+  async repareStartLine() {
+    return await this.migrationService.repareStartLine();
   }
 }

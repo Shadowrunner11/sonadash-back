@@ -6,7 +6,7 @@ import { Projects, ProjectsDocument } from './models/projects.schema';
 import { PaginationParams, sonarCollections } from 'src/types';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { getPaginatedResults } from 'src/tools';
 
 dayjs.extend(utc);
@@ -14,12 +14,11 @@ dayjs.extend(timezone);
 
 @Injectable()
 export class ProjectsService {
+  private logger = new Logger(ProjectsService.name);
   private readonly headerMetrics = [
     { id: 'sonarKey', title: 'key' },
     { id: 'name', title: 'proyecto' },
     { id: 'observation', title: 'observacion' },
-    { id: 'path', title: 'ruta' },
-    { id: 'qualifier', title: 'tipo' },
     { id: 'totalCoveragePercent', title: '%Cobertura' },
     { id: 'linesToCover', title: 'lineas por cubrir' },
     { id: 'linesNoCoverage', title: 'lineas sin cobertura' },
@@ -38,8 +37,6 @@ export class ProjectsService {
     { id: 'sonarKey', title: 'Project Key' },
     { id: 'name', title: 'Project Name' },
     { id: 'observation', title: 'Observacion' },
-    { id: 'path', title: 'Ruta' },
-    { id: 'qualifier', title: 'Tipo' },
     { id: 'totalDensityPercent', title: '%Densidad' },
     { id: 'duplicatedLines', title: 'Lineas Duplicadas' },
     { id: 'duplicatedBlocks', title: 'Bloques Duplicados' },
@@ -52,6 +49,76 @@ export class ProjectsService {
     @InjectModel(sonarCollections.PROJECTS)
     private projectModel: Model<ProjectsDocument>,
   ) {}
+
+  private readonly headersProject = [
+    {
+      id: 'dayCreatedAt',
+      title: 'Dia de muestra',
+    },
+    {
+      id: 'timeCreatedAt',
+      title: 'Hora de muestra',
+    },
+    {
+      id: 'linesOfCode',
+      title: 'Líneas de código',
+    },
+    {
+      id: 'totalLines',
+      title: 'Lineas totales',
+    },
+    {
+      id: 'sonarKey',
+      title: 'Sonar key',
+    },
+    {
+      id: 'name',
+      title: 'Sonar name',
+    },
+    {
+      id: 'analysisDay',
+      title: 'Dia de analisis',
+    },
+    {
+      id: 'analysisTime',
+      title: 'Hora de analisis',
+    },
+  ];
+
+  async getReport() {
+    const projectData: (Projects & { createdAt: Date })[] =
+      await this.projectModel
+        .find()
+        .select({
+          sonarKey: 1,
+          analysisDate: 1,
+          sizeMetrics: 1,
+          name: 1,
+        })
+        .lean();
+
+    const parsedProjectData = projectData.map(
+      ({ createdAt, analysisDate, sizeMetrics, ...rest }) => ({
+        ...sizeMetrics,
+        ...rest,
+        dayCreatedAt: dayjs(createdAt).tz('America/Lima').format('DD/MM/YYYY'),
+        timeCreatedAt: dayjs(createdAt).tz('America/Lima').format('HH:mm:ss'),
+        analysisDay: dayjs(analysisDate)
+          .tz('America/Lima')
+          .format('DD/MM/YYYY'),
+        analysisTime: dayjs(analysisDate).tz('America/Lima').format('HH:mm:ss'),
+      }),
+    );
+
+    const csvWriter = createObjectCsvStringifier({
+      header: this.headersProject,
+    });
+
+    return (
+      csvWriter.getHeaderString() +
+      csvWriter.stringifyRecords(parsedProjectData)
+    );
+  }
 
   findOneById(id: string) {
     return this.projectModel.findById(id);
@@ -70,11 +137,15 @@ export class ProjectsService {
   private parseDuplicationByProjects(
     projects: (Projects & { updatedAt: Date })[],
   ) {
-    return projects.map(({ duplicationMetrics, updatedAt, ...rest }) => ({
+    return projects.map(({ duplicationMetrics, ...rest }) => ({
       ...duplicationMetrics,
       ...rest,
-      dayUpdated: dayjs(updatedAt).tz('America/Lima').format('DD/MM/YYYY'),
-      timeUpdated: dayjs(updatedAt).tz('America/Lima').format('HH:mm:ss'),
+      dayUpdated: dayjs((duplicationMetrics as any).updatedAt)
+        .tz('America/Lima')
+        .format('DD/MM/YYYY'),
+      timeUpdated: dayjs((duplicationMetrics as any).updatedAt)
+        .tz('America/Lima')
+        .format('HH:mm:ss'),
       observation: 'Codigo Duplicado',
     }));
   }
@@ -103,6 +174,8 @@ export class ProjectsService {
   }
 
   async getReportDuplicationMetrics() {
+    this.logger.log('init report duplications');
+
     const projects: (Projects & { updatedAt: Date })[] = await this.projectModel
       .find()
       .select({
@@ -113,6 +186,8 @@ export class ProjectsService {
         updatedAt: 1,
       })
       .lean();
+
+    this.logger.log(projects.length);
 
     const parsedDuplicationByProjects =
       this.parseDuplicationByProjects(projects);

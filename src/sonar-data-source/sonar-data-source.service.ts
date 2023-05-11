@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 import {
   FacetValues,
+  IssueSnippet,
+  IssuesPaginationParams,
   IssuesResponse,
   LanguagesResponse,
   MetricResponse,
@@ -96,7 +98,7 @@ export class SonarDataSourceService {
   async getAllProjects(requestOptions?: RequestPaginationsArgs) {
     const { paginationParams, auth } = requestOptions ?? {};
 
-    const { ps = 500, p = 1 } = paginationParams ?? {};
+    const { ps = 500, p = 1, f = 'analysisDate' } = paginationParams ?? {};
     const {
       paging: { total },
       components: firstProjects,
@@ -105,6 +107,7 @@ export class SonarDataSourceService {
       paginationParams: {
         p,
         ps,
+        f,
       },
     });
 
@@ -119,6 +122,7 @@ export class SonarDataSourceService {
           paginationParams: {
             p: index + 2,
             ps,
+            f,
           },
         }),
       ),
@@ -129,7 +133,9 @@ export class SonarDataSourceService {
     );
   }
 
-  async getPaginatedIssues(requestOptions?: RequestPaginationsArgs) {
+  async getPaginatedIssues(
+    requestOptions?: RequestPaginationsArgs<IssuesPaginationParams>,
+  ) {
     return await this.getPaginatedData<IssuesResponse>(
       '/issues/search',
       requestOptions,
@@ -150,6 +156,8 @@ export class SonarDataSourceService {
       'duplicated_lines_density',
       'duplicated_blocks',
       'duplicated_files',
+      'ncloc',
+      'lines',
     ],
   ) {
     const { data } = await this.client.get<MetricResponse>(
@@ -203,6 +211,19 @@ export class SonarDataSourceService {
       {
         auth,
         params: paginationParams,
+      },
+    );
+
+    return data;
+  }
+
+  async getCommitInfoByIssueKey(issueKey: string) {
+    const { data } = await this.client.get<{ [key: string]: IssueSnippet }>(
+      '/sources/issue_snippets',
+      {
+        params: {
+          issueKey,
+        },
       },
     );
 

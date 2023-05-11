@@ -43,9 +43,15 @@ export class ProjectsController {
     return this.projectService.getReportCoverageMetrics();
   }
 
-  @Get('measures/duplication/report')
+  @Get('/measures/duplication/report')
   @Header('content-type', 'text/csv')
-  getDuplicationMetricsReport() {
-    return this.projectService.getReportDuplicationMetrics();
+  async getDuplicationMetricsReport() {
+    return await this.projectService.getReportDuplicationMetrics();
+  }
+
+  @Get('/report')
+  @Header('content-type', 'text/csv')
+  async getReport() {
+    return this.projectService.getReport();
   }
 }

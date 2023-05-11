@@ -25,11 +25,17 @@ export class IssuesService {
     { id: 'rule', title: 'Regla' },
     { id: 'startLine', title: 'Linea de codigo' },
     { id: 'developerEmail', title: 'Developer' },
+    { id: 'status', title: 'Estado' },
     { id: 'issueCreatedAtDay', title: 'Dia de creacion' },
     { id: 'issueCreatedAtTime', title: 'Hora de creacion' },
     { id: 'issueUpdatedAtDay', title: 'Dia de actualizacion' },
     { id: 'issueUpdatedAtTime', title: 'Hora de actualizacion' },
+    { id: 'migrationDay', title: 'Dia de migracion' },
+    { id: 'migrationTime', title: 'Hora de migracion' },
+    { id: 'project', title: 'Project Name' },
     { id: 'file', title: 'Archivo' },
+    { id: 'commitDay', title: 'Dia de commit' },
+    { id: 'commitTime', title: 'Hora de commit' },
   ];
 
   private readonly logger = new Logger(IssuesService.name);
@@ -55,13 +61,22 @@ export class IssuesService {
     return dayjs(date).tz('utc').format('DD/MM/YYYY HH:mm:ss');
   }
 
-  private preParseIssuesToCSV(issues: Issue[]) {
-    return issues.map(({ issueCreatedAt, issueUpdatedAt, ...rest }) => ({
-      ...rest,
-      issueCreatedAt: this.helperFormatDate(issueCreatedAt),
-      issueUpdatedAt: this.helperFormatDate(issueUpdatedAt),
-    }));
+  private preParseIssuesToCSV(issues: (Issue & { createdAt: Date })[]) {
+    return issues.map(
+      ({ issueCreatedAt, issueUpdatedAt, createdAt, ...rest }) => ({
+        ...rest,
+        issueCreatedAt: this.helperFormatDate(issueCreatedAt),
+        issueUpdatedAt: this.helperFormatDate(issueUpdatedAt),
+        dayCreated: dayjs(createdAt).tz('America/Lima').format('DD/MM/YYYY'),
+        timeCreated: dayjs(createdAt).tz('America/Lima').format('HH:mm:ss'),
+      }),
+    );
   }
+
+  private readonly headers = [
+    { id: 'dayCreated', title: 'Dia de muestra' },
+    { id: 'timeCreated', title: 'Hora de muestra' },
+  ];
 
   // TODO: shoulkd not return a string, but a readble stream to avoid problems with memory
   // TODO: check the psoibility to have a limit, and in case of reachin it, separate the spreadsheets
@@ -69,7 +84,11 @@ export class IssuesService {
   async createReport(filter?: IssuesFilter, fields?: (keyof typeof Issue)[]) {
     this.logger.debug(filter);
     const parsedFilter = filter ? buildFilter({ ...filter }) : {};
-    const issues = await this.issueModel.find(parsedFilter).lean();
+
+    const issues: (Issue & { createdAt: Date })[] = await this.issueModel
+      .find(parsedFilter)
+      .lean();
+
     const parsedIssues = this.preParseIssuesToCSV(issues);
 
     const header = (
@@ -77,7 +96,9 @@ export class IssuesService {
       Object.keys(
         omit(this.issueModel.schema.obj, ['_id', 'createdAt', 'updatedAt']),
       )
-    ).map((key) => ({ id: key, title: key }));
+    )
+      .map((key) => ({ id: key, title: key }))
+      .concat(this.headers);
 
     const csvWriter = createObjectCsvStringifier({ header });
 
@@ -86,33 +107,42 @@ export class IssuesService {
     );
   }
 
-  private parseIssues(issues: Issue[]) {
-    return issues.map(({ issueCreatedAt, issueUpdatedAt, ...rest }) => {
-      const issueCreatedAtDay = getDay(issueCreatedAt);
-      const issueCreatedAtTime = getTime(issueCreatedAt);
+  private parseIssues(issues: (Issue & { createdAt: Date })[]) {
+    return issues.map(
+      ({ issueCreatedAt, issueUpdatedAt, createdAt, commitDate, ...rest }) => {
+        const issueCreatedAtDay = getDay(issueCreatedAt);
+        const issueCreatedAtTime = getTime(issueCreatedAt);
 
-      const issueUpdatedAtDay = issueUpdatedAt
-        ? getDay(issueUpdatedAt)
-        : issueCreatedAtDay;
-      const issueUpdatedAtTime = issueUpdatedAt
-        ? getTime(issueUpdatedAt)
-        : issueCreatedAtTime;
+        const issueUpdatedAtDay = issueUpdatedAt
+          ? getDay(issueUpdatedAt)
+          : issueCreatedAtDay;
+        const issueUpdatedAtTime = issueUpdatedAt
+          ? getTime(issueUpdatedAt)
+          : issueCreatedAtTime;
+        const migrationDate = dayjs(createdAt).tz('America/Lima');
 
-      return {
-        ...rest,
-        issueCreatedAtDay,
-        issueCreatedAtTime,
-        issueUpdatedAtDay,
-        issueUpdatedAtTime,
-      };
-    });
+        const commitParsedDate = dayjs(commitDate).tz('America/Lima');
+
+        return {
+          ...rest,
+          issueCreatedAtDay,
+          issueCreatedAtTime,
+          issueUpdatedAtDay,
+          issueUpdatedAtTime,
+          migrationTime: migrationDate.format('HH:mm:ss'),
+          migrationDay: migrationDate.format('DD/MM/YYYY'),
+          commitDay: commitParsedDate.format('DD/MM/YYYY'),
+          commitTime: commitParsedDate.format('HH:mm:ss'),
+        };
+      },
+    );
   }
 
   async createReportSpanish(filter?: IssuesFilter) {
     const parsedFilter = filter ? buildFilter({ ...filter }) : {};
     const issues = await this.issueModel.find(parsedFilter).lean();
 
-    const parsedIssues = this.parseIssues(issues);
+    const parsedIssues = this.parseIssues(issues as any);
 
     const csvWriter = createObjectCsvStringifier({
       header: this.issuesCustomHeader,

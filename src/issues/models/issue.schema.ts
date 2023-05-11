@@ -76,6 +76,10 @@ export class Issue {
   @Field()
   @Prop()
   project: string;
+
+  @Field({ nullable: true })
+  @Prop()
+  commitDate: Date;
 }
 
 export type IssueDocument = HydratedDocument<Issue>;
