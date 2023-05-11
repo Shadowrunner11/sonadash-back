@@ -19,6 +19,7 @@ dayjs.extend(timezone);
 @Injectable()
 export class IssuesService {
   private readonly issuesCustomHeader = [
+    { id: 'sonarkey', title: 'Sonarkey' },
     { id: 'observation', title: 'Observacion' },
     { id: 'severity', title: 'Severidad' },
     { id: 'language', title: 'Lenguaje' },
@@ -131,8 +132,8 @@ export class IssuesService {
           issueUpdatedAtTime,
           migrationTime: migrationDate.format('HH:mm:ss'),
           migrationDay: migrationDate.format('DD/MM/YYYY'),
-          commitDay: commitParsedDate.format('DD/MM/YYYY'),
-          commitTime: commitParsedDate.format('HH:mm:ss'),
+          commitDay: commitDate ? commitParsedDate.format('DD/MM/YYYY') : '--',
+          commitTime: commitDate ? commitParsedDate.format('HH:mm:ss') : '--',
         };
       },
     );
