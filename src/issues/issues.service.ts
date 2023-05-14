@@ -19,7 +19,7 @@ dayjs.extend(timezone);
 @Injectable()
 export class IssuesService {
   private readonly issuesCustomHeader = [
-    { id: 'sonarkey', title: 'Sonarkey' },
+    { id: 'sonarKey', title: 'Sonarkey' },
     { id: 'observation', title: 'Observacion' },
     { id: 'severity', title: 'Severidad' },
     { id: 'language', title: 'Lenguaje' },
