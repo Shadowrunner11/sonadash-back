@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  Res,
 } from '@nestjs/common';
 import { IssuesMigrationService } from './issues.migration.service';
 import { ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
@@ -15,6 +16,7 @@ import { getCredentialsFromBasicAuth } from 'src/tools';
 import { IssuesService } from './issues.service';
 import { IssuesFilter } from './models/issue.graphql';
 import { Issue } from './models/issue.schema';
+import { Response } from 'express';
 
 interface IssuesLimitedOptions {
   readonly pageSize?: number;
@@ -74,8 +76,20 @@ export class IssuesController {
 
   @Post('/report/spanish')
   @Header('content-type', 'text/csv')
-  reportSpanish(@Body() { filters }: IBodyReport) {
-    return this.issueService.createReportSpanish(filters);
+  async reportSpanish(
+    @Body() { filters }: IBodyReport,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { csvData, timeString } =
+      await this.issueService.getReportDataSpanish(filters);
+
+    const fileName = `${timeString} - issues`;
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${fileName}.csv"`,
+    );
+
+    return csvData;
   }
 
   @Put('/commitDate')

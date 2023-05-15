@@ -6,9 +6,11 @@ import {
   Patch,
   Post,
   Put,
+  Res,
 } from '@nestjs/common';
 import { ProjectsMigrationService } from './projects.migration.service';
 import { ProjectsService } from './projects.service';
+import { Response } from 'express';
 
 @Controller('projects')
 export class ProjectsController {
@@ -23,35 +25,50 @@ export class ProjectsController {
   }
 
   @Patch('/measures/all')
-  updateMeasures() {
-    return this.migrationService.migrateAllMeasures();
+  async updateMeasures() {
+    return await this.migrationService.migrateAllMeasures();
   }
 
   @Patch('/measures/new')
-  updateNewMeasures() {
-    return this.migrationService.updateNewMeasures();
+  async updateNewMeasures() {
+    return await this.migrationService.updateNewMeasures();
   }
 
   @Put('/measures/:projectKey')
-  updateMeausresByProjectKey(@Param('projectKey') projectKey: string) {
-    return this.migrationService.updateMeasuresByProject(projectKey);
+  async updateMeasuresByProjectKey(@Param('projectKey') projectKey: string) {
+    return await this.migrationService.updateMeasuresByProject(projectKey);
   }
 
   @Get('/measures/coverage/report')
   @Header('content-type', 'text/csv')
-  getCoverageMetricsReport() {
-    return this.projectService.getReportCoverageMetrics();
+  async getCoverageMetricsReport(@Res({ passthrough: true }) res: Response) {
+    const { csvData, timeString } =
+      await this.projectService.getReportCoverageMetrics();
+    const fileName = `${timeString} - coverage`;
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${fileName}.csv"`,
+    );
+
+    return csvData;
   }
 
   @Get('/measures/duplication/report')
   @Header('content-type', 'text/csv')
-  async getDuplicationMetricsReport() {
-    return await this.projectService.getReportDuplicationMetrics();
+  async getDuplicationMetricsReport(@Res({ passthrough: true }) res: Response) {
+    const { csvData, timeString } =
+      await this.projectService.getReportDuplicationMetrics();
+    const fileName = `${timeString} - duplications`;
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${fileName}.csv"`,
+    );
+    return csvData;
   }
 
   @Get('/report')
   @Header('content-type', 'text/csv')
   async getReport() {
-    return this.projectService.getReport();
+    return await this.projectService.getReport();
   }
 }

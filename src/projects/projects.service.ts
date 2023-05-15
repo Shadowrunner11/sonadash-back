@@ -15,34 +15,33 @@ dayjs.extend(timezone);
 @Injectable()
 export class ProjectsService {
   private logger = new Logger(ProjectsService.name);
+
   private readonly headerMetrics = [
-    { id: 'sonarKey', title: 'key' },
-    { id: 'name', title: 'proyecto' },
-    { id: 'observation', title: 'observacion' },
-    { id: 'totalCoveragePercent', title: '%Cobertura' },
-    { id: 'linesToCover', title: 'lineas por cubrir' },
-    { id: 'linesNoCoverage', title: 'lineas sin cobertura' },
-    { id: 'linesCoveragePercent', title: '% Cobertura de lineas' },
-    { id: 'qtyConditionsToCover', title: 'Condiciones por cubrir' },
-    { id: 'qtyConditionsWithoutCover', title: 'Condiciones sin cobertura' },
+    { id: 'sonarKey', title: 'PROJECT KEY' },
+    { id: 'name', title: 'PROJECT NAME' },
+    { id: 'totalCoveragePercent', title: '% COVER' },
+    { id: 'linesToCover', title: 'LINES TO COV' },
+    { id: 'linesNoCoverage', title: 'LINES W/COV' },
+    { id: 'linesCoveragePercent', title: '% LINE COVER' },
+    { id: 'qtyConditionsToCover', title: 'COND TO COV' },
+    { id: 'qtyConditionsWithoutCover', title: 'COND W/COV' },
     {
       id: 'conditionsCoveragePercentage',
-      title: '% Cobertura de condiciones',
+      title: '% COND COV',
     },
-    { id: 'dayUpdated', title: 'Dia de muestra' },
-    { id: 'timeUpdated', title: 'Hora de muestra' },
+    { id: 'dayUpdated', title: 'D. MIGRA BD' },
+    { id: 'timeUpdated', title: 'H. MIGRA BD' },
   ];
 
   private readonly headerDuplicationMetrics = [
-    { id: 'sonarKey', title: 'Project Key' },
-    { id: 'name', title: 'Project Name' },
-    { id: 'observation', title: 'Observacion' },
-    { id: 'totalDensityPercent', title: '%Densidad' },
-    { id: 'duplicatedLines', title: 'Lineas Duplicadas' },
-    { id: 'duplicatedBlocks', title: 'Bloques Duplicados' },
-    { id: 'duplicatedFiles', title: 'Archivos Duplicados' },
-    { id: 'dayUpdated', title: 'Dia de muestra' },
-    { id: 'timeUpdated', title: 'Hora de muestra' },
+    { id: 'sonarKey', title: 'PROJECT KEY' },
+    { id: 'name', title: 'PROJECT NAME' },
+    { id: 'totalDensityPercent', title: '% DUPLIC' },
+    { id: 'duplicatedLines', title: 'LINE DUPLIC' },
+    { id: 'duplicatedBlocks', title: 'BLOCK DUPLIC' },
+    { id: 'duplicatedFiles', title: 'FILE DUPLIC' },
+    { id: 'dayUpdated', title: 'D. MIGRA BD' },
+    { id: 'timeUpdated', title: 'H. MIGRA BD' },
   ];
 
   constructor(
@@ -52,36 +51,36 @@ export class ProjectsService {
 
   private readonly headersProject = [
     {
-      id: 'dayCreatedAt',
-      title: 'Dia de muestra',
-    },
-    {
-      id: 'timeCreatedAt',
-      title: 'Hora de muestra',
-    },
-    {
-      id: 'linesOfCode',
-      title: 'Líneas de código',
-    },
-    {
-      id: 'totalLines',
-      title: 'Lineas totales',
-    },
-    {
       id: 'sonarKey',
-      title: 'Sonar key',
+      title: 'PROJECT KEY',
     },
     {
       id: 'name',
-      title: 'Sonar name',
+      title: 'PROJECT NAME',
+    },
+    {
+      id: 'linesOfCode',
+      title: 'LINES OF COD',
+    },
+    {
+      id: 'totalLines',
+      title: 'LINES TOTAL',
     },
     {
       id: 'analysisDay',
-      title: 'Dia de analisis',
+      title: 'D. LAST ANALYSIS',
     },
     {
       id: 'analysisTime',
-      title: 'Hora de analisis',
+      title: 'H. LAST ANALYSIS',
+    },
+    {
+      id: 'dayCreatedAt',
+      title: 'D. MIGRA DB',
+    },
+    {
+      id: 'timeCreatedAt',
+      title: 'H. MIGRA DB',
     },
   ];
 
@@ -151,16 +150,17 @@ export class ProjectsService {
   }
 
   async getReportCoverageMetrics() {
-    const projects: (Projects & { updatedAt: Date })[] = await this.projectModel
-      .find()
-      .select({
-        sonarKey: 1,
-        name: 1,
-        coverageMetrics: 1,
-        qualifier: 1,
-        updatedAt: 1,
-      })
-      .lean();
+    const projects: (Projects & { updatedAt: Date; createdAt: Date })[] =
+      await this.projectModel
+        .find()
+        .select({
+          sonarKey: 1,
+          name: 1,
+          coverageMetrics: 1,
+          qualifier: 1,
+          updatedAt: 1,
+        })
+        .lean();
 
     const parsedProjects = this.parseProjects(projects);
 
@@ -168,24 +168,30 @@ export class ProjectsService {
       header: this.headerMetrics,
     });
 
-    return (
-      csvWriter.getHeaderString() + csvWriter.stringifyRecords(parsedProjects)
-    );
+    const [{ createdAt }] = projects;
+
+    return {
+      timeString: dayjs(createdAt).tz('America/Lima').format('YYYY MM DD'),
+      csvData:
+        csvWriter.getHeaderString() +
+        csvWriter.stringifyRecords(parsedProjects),
+    };
   }
 
   async getReportDuplicationMetrics() {
     this.logger.log('init report duplications');
 
-    const projects: (Projects & { updatedAt: Date })[] = await this.projectModel
-      .find()
-      .select({
-        sonarKey: 1,
-        name: 1,
-        duplicationMetrics: 1,
-        qualifier: 1,
-        updatedAt: 1,
-      })
-      .lean();
+    const projects: (Projects & { updatedAt: Date; createdAt: Date })[] =
+      await this.projectModel
+        .find()
+        .select({
+          sonarKey: 1,
+          name: 1,
+          duplicationMetrics: 1,
+          qualifier: 1,
+          updatedAt: 1,
+        })
+        .lean();
 
     this.logger.log(projects.length);
 
@@ -196,10 +202,14 @@ export class ProjectsService {
       header: this.headerDuplicationMetrics,
     });
 
-    return (
-      csvWriter.getHeaderString() +
-      csvWriter.stringifyRecords(parsedDuplicationByProjects)
-    );
+    const [{ createdAt }] = projects;
+
+    return {
+      csvData:
+        csvWriter.getHeaderString() +
+        csvWriter.stringifyRecords(parsedDuplicationByProjects),
+      timeString: dayjs(createdAt).tz('America/Lima').format('YYYY MM DD'),
+    };
   }
 
   getPaginatedProjects(params: PaginationParams) {

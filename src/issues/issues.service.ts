@@ -21,23 +21,23 @@ export class IssuesService {
   private readonly issuesCustomHeader = [
     { id: 'sonarKey', title: 'ISSUE KEY' },
     { id: 'observation', title: 'ISSUE' },
-    { id: 'severity', title: 'SEVERIDAD' },
-    { id: 'language', title: 'LENGUAJE' },
-    { id: 'rule', title: 'REGLA' },
-    { id: 'startLine', title: 'L. CODIGO' },
-    { id: 'status', title: 'ESTADO' },
+    { id: 'severity', title: 'SEVERITY' },
+    { id: 'language', title: 'LENGUAGE' },
+    { id: 'rule', title: 'RULE' },
+    { id: 'startLine', title: 'LINES OF CODE' },
+    { id: 'status', title: 'STATUS' },
     { id: 'project', title: 'PROJECT NAME' },
-    { id: 'developerEmail', title: 'AUTOR' },
-    { id: 'issueCreatedAtDay', title: 'D. OBSERVACION' },
-    { id: 'issueCreatedAtTime', title: 'H. OBSERVACION' },
-    { id: 'issueUpdatedAtDay', title: 'D. OBS ACT' },
-    { id: 'issueUpdatedAtTime', title: 'H. OBS ACT' },
+    { id: 'developerEmail', title: 'AUTHOR' },
+    { id: 'issueCreatedAtDay', title: 'D. ISSUE DET' },
+    { id: 'issueCreatedAtTime', title: 'H. ISSUE DET' },
+    { id: 'issueUpdatedAtDay', title: 'D. ISSUE UPD' },
+    { id: 'issueUpdatedAtTime', title: 'H. ISSUE UPD' },
     { id: 'migrationDay', title: 'D. MIGRA BD' },
     { id: 'migrationTime', title: 'H. MIGRA BD' },
     { id: 'commitDay', title: 'D. COMMIT' },
     { id: 'commitTime', title: 'H. COMMIT' },
-    { id: 'file', title: 'ARCHIVO' },
-    { id: 'sonarRuleMessage', title: 'RECOMENDACION' },
+    { id: 'file', title: 'ARCHIVE' },
+    { id: 'sonarRuleMessage', title: 'SUGGESTION' },
   ];
 
   private readonly logger = new Logger(IssuesService.name);
@@ -140,18 +140,23 @@ export class IssuesService {
     );
   }
 
-  async createReportSpanish(filter?: IssuesFilter) {
+  async getReportDataSpanish(filter?: IssuesFilter) {
     const parsedFilter = filter ? buildFilter({ ...filter }) : {};
-    const issues = await this.issueModel.find(parsedFilter).lean();
+    const issues: (Issue & { createdAt: Date; updatedAt: Date })[] =
+      await this.issueModel.find(parsedFilter).lean();
 
-    const parsedIssues = this.parseIssues(issues as any);
+    const parsedIssues = this.parseIssues(issues);
 
     const csvWriter = createObjectCsvStringifier({
       header: this.issuesCustomHeader,
     });
 
-    return (
-      csvWriter.getHeaderString() + csvWriter.stringifyRecords(parsedIssues)
-    );
+    const [{ updatedAt }] = issues;
+
+    return {
+      csvData:
+        csvWriter.getHeaderString() + csvWriter.stringifyRecords(parsedIssues),
+      timeString: dayjs(updatedAt).tz('America/Lima').format('YYYY MM DD'),
+    };
   }
 }
