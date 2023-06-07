@@ -159,6 +159,7 @@ export class ProjectsService {
           coverageMetrics: 1,
           qualifier: 1,
           updatedAt: 1,
+          createdAt: 1,
         })
         .lean();
 
@@ -190,6 +191,7 @@ export class ProjectsService {
           duplicationMetrics: 1,
           qualifier: 1,
           updatedAt: 1,
+          createdAt: 1,
         })
         .lean();
 

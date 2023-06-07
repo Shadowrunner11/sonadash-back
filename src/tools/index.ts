@@ -87,8 +87,8 @@ export const singularize = (
 };
 
 export const buildTimeFitler = ({ afterDate, beforeDate }: TimeFilter) => ({
-  ...(afterDate ? { $gte: afterDate } : {}),
-  ...(beforeDate ? { $lte: beforeDate } : {}),
+  ...(afterDate ? { $gte: new Date(afterDate) } : {}),
+  ...(beforeDate ? { $lte: new Date(beforeDate) } : {}),
 });
 
 //TODO: it is not correct to cast as any, th problem is that filter passed from request has not prototype for securtyri reasons

@@ -80,9 +80,9 @@ export class IssuesService {
     { id: 'timeCreated', title: 'Hora de muestra' },
   ];
 
-  // TODO: shoulkd not return a string, but a readble stream to avoid problems with memory
-  // TODO: check the psoibility to have a limit, and in case of reachin it, separate the spreadsheets
-  // TODO: investigate about soluions to avoid using in memory, maybe partially appending to a file in the server and then deleting it
+  // TODO: should not return a string, but a readable stream to avoid problems with memory
+  // TODO: check the possibility to have a limit, and in case of reachin it, separate the spreadsheets
+  // TODO: investigate about solutions to avoid using in memory, maybe partially appending to a file in the server and then deleting it
   async createReport(filter?: IssuesFilter, fields?: (keyof typeof Issue)[]) {
     this.logger.debug(filter);
     const parsedFilter = filter ? buildFilter({ ...filter }) : {};
@@ -142,6 +142,9 @@ export class IssuesService {
 
   async getReportDataSpanish(filter?: IssuesFilter) {
     const parsedFilter = filter ? buildFilter({ ...filter }) : {};
+    /*     console.log('asda', filter, parsedFilter);
+    const a = true;
+    if (a) throw 'asdasd'; */
     const issues: (Issue & { createdAt: Date; updatedAt: Date })[] =
       await this.issueModel.find(parsedFilter).lean();
 
@@ -151,12 +154,12 @@ export class IssuesService {
       header: this.issuesCustomHeader,
     });
 
-    const [{ updatedAt }] = issues;
+    const [{ createdAt }] = issues;
 
     return {
       csvData:
         csvWriter.getHeaderString() + csvWriter.stringifyRecords(parsedIssues),
-      timeString: dayjs(updatedAt).tz('America/Lima').format('YYYY MM DD'),
+      timeString: dayjs(createdAt).tz('America/Lima').format('YYYY MM DD'),
     };
   }
 }

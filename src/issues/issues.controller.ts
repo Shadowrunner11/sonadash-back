@@ -98,7 +98,7 @@ export class IssuesController {
   }
 
   @Patch('/repareStartLine')
-  async repareStartLine() {
+  async repairStartLine() {
     return await this.migrationService.repareStartLine();
   }
 }

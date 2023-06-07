@@ -40,8 +40,6 @@ export class ProjectsMigrationService {
   async migrateAllProjects() {
     const allProjects = await this.sonarDataSource.getAllProjects();
 
-    console.log(allProjects[0]);
-
     const alreadyMigratedProjects = await this.projectModel
       .distinct('sonarKey')
       .exec();

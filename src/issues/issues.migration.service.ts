@@ -246,9 +246,15 @@ export class IssuesMigrationService {
 
   async getCommitInfoByIssueKey(limit = 120) {
     const total = await this.issueModel
-      .find({ commitDate: null, startLine: { $ne: 0 } })
+      .find({
+        issueUpdatedAt: { $gte: new Date('2023-05-01') },
+        commitDate: null,
+        startLine: { $ne: 0 },
+      })
       .count()
       .exec();
+
+    console.log(total);
 
     const iterations = Math.round(total / limit);
 

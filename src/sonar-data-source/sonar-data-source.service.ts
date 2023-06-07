@@ -111,9 +111,9 @@ export class SonarDataSourceService {
       },
     });
 
-    const pages = Math.round(total / ps) - 1;
+    const pages = Math.round(total / ps);
 
-    const emptyIterationsArray = Array.from(Array(pages));
+    const emptyIterationsArray = Array.from({ length: pages });
 
     const nextProjectsResponse = await Promise.all(
       emptyIterationsArray.map((_, index) =>
