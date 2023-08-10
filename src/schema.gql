@@ -147,7 +147,7 @@ input IssuesFilter {
   rules: FilterItemsString
   projects: FilterItemsString
   issueCreatedAt: TimeFilter
-  issuedUpdatedAt: TimeFilter
+  issueUpdatedAt: TimeFilter
   status: FilterItemString
 }
 
